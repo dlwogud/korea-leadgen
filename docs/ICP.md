@@ -1,5 +1,10 @@
 # ICP Hypotheses — Korean Market, per Service Area
 
+> **The machine-readable ICP is `config/icp.json`** — it drives *both* sourcing
+> (which keywords to search) *and* scoring (per-service fit). This doc is the
+> human explanation; edit the JSON to change the ICP, no code changes needed.
+> Once the team/mentor confirm the real ICP, update that file.
+
 Ideal Customer Profile **hypotheses** for each offering. These are starting
 assumptions to be validated against real Week-2 responses, not facts. Each
 profile lists the firmographic fit, the buying signals we can detect, the

@@ -62,7 +62,7 @@ def main() -> None:
     rows = []
     for company in read_companies():
         name = company.get("company_name", "")
-        firmo = firmographic_score(company.get("industry", ""))
+        firmo = firmographic_score(company)
         intent = intent_score(int(company.get("hiring_count") or 0))
         reach = contacts.get(name, {}).get("reachability", 0.0)
         contact_row = contacts.get(name, {}).get("row", {})

@@ -34,18 +34,14 @@ from collections import Counter
 
 import requests
 
+import icp
 from _common import load_dotenv, write_companies
 
 API_URL = "https://oapi.saramin.co.kr/job-search"
 
-# Fallback keyword set — covers Springboard's IT-Servicing scope (dev, QA,
-# infra, support). Used only when no --job-mid-cd category is given.
-DEFAULT_KEYWORDS = [
-    "백엔드", "프론트엔드", "서버 개발", "데이터 엔지니어",  # software / data dev
-    "DevOps", "시스템 엔지니어",                          # infrastructure / sysadmin
-    "QA", "테스트 엔지니어",                              # quality assurance
-    "기술지원",                                          # technical support
-]
+# Keywords come from the ICP (config/icp.json) — sourcing is ICP-driven.
+# Default = union of all services' keywords; narrow with --service or --keywords.
+DEFAULT_KEYWORDS = icp.all_keywords()
 
 COUNT_PER_CALL = 110          # Saramin max per call
 SAFETY_MAX_CALLS = 50         # hard stop well under the 500/day limit
@@ -195,6 +191,8 @@ def main() -> None:
     load_dotenv()
     parser = argparse.ArgumentParser(description="Source Korean companies from Saramin job postings.")
     parser.add_argument("--job-mid-cd", help="Saramin job category code (CATEGORY mode)")
+    parser.add_argument("--service", choices=icp.services(),
+                        help="source only this service's ICP keywords (config/icp.json)")
     parser.add_argument("--keywords", default=",".join(DEFAULT_KEYWORDS),
                         help="comma-separated keywords (KEYWORD mode / category discovery seed)")
     parser.add_argument("--pages", type=int, default=2, help="pages per query (110 postings each)")
@@ -216,7 +214,8 @@ def main() -> None:
     if args.job_mid_cd:
         rows = fetch_companies(key, job_mid_cd=args.job_mid_cd, pages=args.pages, debug=args.debug)
     else:
-        keywords = [k.strip() for k in args.keywords.split(",") if k.strip()]
+        keywords = icp.keywords(args.service) if args.service else \
+            [k.strip() for k in args.keywords.split(",") if k.strip()]
         rows = fetch_companies(key, keywords=keywords, pages=args.pages, debug=args.debug)
 
     write_companies(rows)

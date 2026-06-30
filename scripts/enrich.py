@@ -16,6 +16,7 @@ from __future__ import annotations
 import csv
 from datetime import datetime, timezone
 
+import icp
 from _common import DATA_DIR, RAW_CSV, read_companies
 
 DB_CSV = DATA_DIR / "companies_db.csv"
@@ -28,25 +29,6 @@ DB_FIELDS = [
     "source", "source_url", "first_seen", "last_seen",
 ]
 
-# Tech terms to detect in job titles (extend freely)
-TECH_TERMS = [
-    "Java", "Python", "Node.js", "Spring", "Kotlin", "Rust", "PHP",
-    "React", "Vue", "Angular", "TypeScript", "Next.js", "Flutter", "Android", "iOS", "Swift",
-    "AWS", "GCP", "Azure", "Kubernetes", "Docker", "Terraform",
-    "Kafka", "Spark", "Airflow", "Hadoop", "SQL", "MongoDB", "Redis", "Elasticsearch",
-    "TensorFlow", "PyTorch", "ML", "AI", "NLP", "LLM",
-]
-
-# Industry hints that indicate tech-building (IT-Servicing / Manpower fit)
-TECH_INDUSTRY = ["IT", "정보통신", "소프트웨어", "솔루션", "플랫폼", "게임", "인터넷",
-                 "모바일", "AI", "인공지능", "핀테크", "이커머스", "데이터", "보안", "SI"]
-# Traditional industries that more often need Systems Integration
-TRADITIONAL_INDUSTRY = ["제조", "유통", "물류", "금융", "은행", "보험", "공공", "건설", "의료"]
-# Signals that indicate AI-Implementation need (note: plain "데이터" excluded —
-# data engineering is not the same as needing AI built)
-AI_TERMS = ["AI", "인공지능", "ML", "머신러닝", "추천", "NLP", "LLM",
-            "TensorFlow", "PyTorch", "컴퓨터비전"]
-
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -54,41 +36,18 @@ def _now() -> str:
 
 def extract_tech_stack(titles: str) -> str:
     text = (titles or "").lower()
-    found = [t for t in TECH_TERMS if t.lower() in text]
-    # dedupe preserving order
-    seen, out = set(), []
+    found = [t for t in icp.tech_terms() if t.lower() in text]
+    seen, out = set(), []                               # dedupe, preserve order
     for t in found:
         if t.lower() not in seen:
             seen.add(t.lower()); out.append(t)
     return ";".join(out)
 
 
-def _has(hints, *texts) -> bool:
-    blob = " ".join(t or "" for t in texts).lower()
-    return any(h.lower() in blob for h in hints)
-
-
 def service_fits(row: dict, tech_stack: str) -> dict:
-    titles = row.get("sample_titles", "")
-    industry = row.get("industry", "")
-    hiring = int(row.get("hiring_count") or 0)
-    intent = min(1.0, hiring / 5)                      # hiring-signal strength
-    is_tech = _has(TECH_INDUSTRY, industry) or bool(tech_stack)
-    tech = 1.0 if is_tech else 0.4
-
-    fit_it = 100 * (0.5 * tech + 0.5 * intent)         # deliver the dev work
-    fit_manpower = 100 * (0.4 * tech + 0.6 * intent)   # fill the dev seats (volume)
-    ai_sig = 1.0 if _has(AI_TERMS, titles, industry, tech_stack) else 0.2
-    fit_ai = 100 * (0.7 * ai_sig + 0.3 * intent)
-    si_sig = 1.0 if _has(TRADITIONAL_INDUSTRY, industry) else 0.2
-    fit_si = 100 * (0.6 * si_sig)                      # low-confidence from job data
-
-    fits = {
-        "fit_it_servicing": round(fit_it, 1),
-        "fit_manpower": round(fit_manpower, 1),
-        "fit_ai_implementation": round(fit_ai, 1),
-        "fit_systems_integration": round(fit_si, 1),
-    }
+    """Per-service fit, all driven by config/icp.json (the ICP)."""
+    scoring_row = {**row, "tech_stack": tech_stack}
+    fits = {f"fit_{svc}": round(icp.fit(scoring_row, svc), 1) for svc in icp.services()}
     best = max(fits, key=fits.get).replace("fit_", "")
     return {**fits, "best_service": best}
 

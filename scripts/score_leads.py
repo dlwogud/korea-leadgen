@@ -21,21 +21,18 @@ from __future__ import annotations
 
 import csv
 
+import icp
 from _common import DATA_DIR, RAW_CSV, SCORED_CSV, ensure_data_dir, read_companies
-
-# Industry keywords that indicate a tech-building company (strong IT-Servicing fit)
-TECH_INDUSTRY_HINTS = [
-    "IT", "정보통신", "소프트웨어", "솔루션", "플랫폼", "게임", "인터넷",
-    "모바일", "AI", "인공지능", "핀테크", "이커머스", "데이터", "보안", "SI",
-]
 
 INTENT_SATURATION = 5   # this many open dev roles ≈ a strong, saturated signal
 
 
-def firmographic_score(industry: str) -> float:
-    """0..1 — industry tech-fit blended with a neutral size placeholder."""
-    industry = industry or ""
-    industry_fit = 1.0 if any(h.lower() in industry.lower() for h in TECH_INDUSTRY_HINTS) else 0.4
+def firmographic_score(row: dict) -> float:
+    """0..1 — industry fit (vs the ICP for this lead's best service) + size placeholder."""
+    industry = row.get("industry", "") or ""
+    best = row.get("best_service") or "it_servicing"
+    targets = icp.target_industries(best)
+    industry_fit = 1.0 if any(t.lower() in industry.lower() for t in targets) else 0.4
     size_placeholder = 0.5  # unknown from job data; enriched later via DART
     return (industry_fit + size_placeholder) / 2
 
@@ -47,7 +44,7 @@ def intent_score(hiring_count: int) -> float:
 
 def score_company(row: dict) -> dict:
     hiring_count = int(row.get("hiring_count") or 0)
-    firmo = firmographic_score(row.get("industry", ""))
+    firmo = firmographic_score(row)
     intent = intent_score(hiring_count)
     reachability = 0.0  # no contact yet → enriched when contacts are added
 
