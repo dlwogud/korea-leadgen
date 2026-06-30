@@ -1,0 +1,11 @@
+# Local secrets
+.env
+
+# Generated data
+data/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
