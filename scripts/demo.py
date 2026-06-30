@@ -97,6 +97,7 @@ def main() -> None:
     run("rescore_with_contacts.py")
     seed_pipeline_events()
     run("dashboard.py")
+    run("build_db.py")
     print(f"\n{'#'*64}")
     print("DEMO COMPLETE. Show these:")
     print("  • terminal output above (ranked leads + contact lift + funnel)")

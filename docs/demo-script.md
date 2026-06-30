@@ -43,12 +43,6 @@ in order. English = what to say, 한국어 = meaning.
 *(지금은 샘플 데이터예요. 키 넣으면 진짜 회사로 똑같이 작동해요. 점수는 1차 버전이고,
 나중에 실제 응답 데이터로 가중치 개선할 거예요.)*
 
----
-
-## Safety lines (막힐 때)
-- Stuck → **"Let me show you."** (보여줄게요 — 화면 가리키기)
-- Asked a question → **"Good question — let me check."** (좋은 질문이에요, 확인할게요)
-- Don't know → **"I'm not sure yet, I'll find out."** (아직 잘 모르겠어요, 알아볼게요)
 
 ## If you only memorise 3 lines (3문장만)
 1. "It finds and ranks Korean companies as leads." (찾고 순위 매긴다)

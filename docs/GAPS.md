@@ -42,9 +42,9 @@ Legend: 🔴 high  🟡 medium  🟢 low   ·   🔒 = blocked on mentor decisio
 - 🟡 **Company dedup is by name string.** Same company under variant spellings
   ("(주)온누리페이" vs "온누리페이") counts as two. *Fix:* normalise names /
   match on domain (the schema already has a `domain` unique key — wire it).
-- 🟡 **Schema vs CSV split.** db/schema.sql is a nice target design but the live
-  pipeline runs on CSV; the schema isn't wired. *Fix:* load into SQLite (zero
-  setup) so outreach/funnel tables become real and queryable.
+- ✅ ~~**Schema vs CSV split.**~~ *Closed:* `build_db.py` loads the CSVs into a
+  real SQLite DB (db/schema_sqlite.sql → data/leadgen.db); `query_db.py` runs
+  SQL (joins, views, funnel). The DB is now queryable, not just spreadsheets.
 - 🟢 **No automated tests.** Pure functions (scoring, reachability, parsing) are
   easily unit-testable. *Fix:* a small pytest suite.
 - 🟢 **Firmographic size is a 0.5 placeholder** (Saramin gives no employee count).

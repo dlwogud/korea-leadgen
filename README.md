@@ -92,6 +92,7 @@ field mappings are marked `# VERIFY` until run against a live key.
 - [x] Contact enrichment workflow (`make_contact_worksheet.py` → fill → `rescore_with_contacts.py`)
 - [x] Funnel logging + dashboard (`log_event.py`, `dashboard.py` → terminal + HTML)
 - [x] Living DB: tech-stack signal + per-service fit (all 4) + first/last_seen (`enrich.py`)
+- [x] Real SQLite database + SQL queries (`build_db.py`, `query_db.py`, `db/schema_sqlite.sql`)
 - [x] One-command demo on sample data (`demo.py`)
 - [ ] Add free Saramin key and run on real postings
 - [ ] Firmographic enrichment via DART (company size — still a placeholder)
