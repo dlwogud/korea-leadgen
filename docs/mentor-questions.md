@@ -1,62 +1,83 @@
 # Questions for the mentor / Jake — 멘토에게 물어볼 것
 
-Resolve the top section first; it unblocks the rest of the work. English to ask,
-Korean for you. (먼저 위쪽 필수 질문부터. 영어는 물어볼 말, 한국어는 뜻.)
+Ask Group A & B first — they unblock everything. English = what to say,
+한국어 = meaning. Lead with "I built X, is this right?" (주도적), not
+"what should I do?" (수동적).
 
 ---
 
-## 🔥 Must-ask (필수 — 이게 정해져야 일이 굴러감)
+## 🔥 A. My role & team structure (내 위치 — 필수)
 
+**1. Track scope (트랙)**
+> Am I focused on one track, or doing sourcing + scoring + outreach all myself?
+> *(저 한 트랙만 해요, 아니면 소싱·점수·아웃리치 다 해요?)*
 
-**1. Is my direction right? (방향 확인)**
-> I built a tool that sources Korean companies from job postings and ranks them
-> by fit. Is this what you want from the data side, or something else?
-> *(채용공고로 한국 기업 찾아 순위 매기는 툴 만들었는데, 데이터 쪽으로 이게 원하는 거 맞아요?)*
+**2. Pod structure (팟 구성)**
+> How are the 5 of us grouped — one pod, or split? What's my role?
+> *(저희 5명 어떻게 묶여요 — 한 팟? 나뉘어요? 제 역할은요?)*
 
-**2. Prototype or commercial? (검증용 vs 상업용)**
-> Is this a prototype / proof-of-concept, or will it be used commercially right
-> away? It changes which data source I should use (free API vs public data).
-> *(이거 프로토타입이에요, 아니면 바로 상업적으로 써요? 데이터 소스가 달라져서요.)*
-
-**3. Delivery format (결과물 형식) — 도입 중요**
-> The team works in spreadsheets, right? My tool can output a clean spreadsheet
-> of scored leads. Where should I deliver it — a shared Google Sheet, your CRM,
-> or somewhere else?
-> *(팀은 스프레드시트로 일하시죠? 제 툴이 점수 매겨진 리드를 스프레드시트로 뽑아드릴 수
-> 있어요. 어디로 드릴까요 — 공용 구글시트, CRM, 아니면 다른 곳?)*
+**3. Division of labour (분업)**
+> Should I automate the sourcing so the business track focuses on outreach, or
+> do they source companies manually?
+> *(제가 소싱 자동화해서 비즈니스가 연락에 집중하게 할까요, 아니면 그들이 직접 찾아요?)*
 
 ---
 
-## 🟡 This week (이번 주 안에 알면 됨)
+## 🔥 B. Direction & target (방향 — 필수)
 
-**5. Outreach channel (아웃리치 채널)**
-> What channel do we use for outreach — email or LinkedIn? Can replies be
-> tracked automatically?
-> *(아웃리치 이메일이에요, 링크드인이에요? 응답 자동 추적 돼요?)*
+**4. Is my direction right? (방향 확인)**
+> I built a tool that sources Korean companies and ranks them by fit. Is this
+> what you want from the data side, or something different?
+> *(한국 기업 찾아 적합도로 순위 매기는 툴 만들었는데, 데이터 쪽으로 이게 맞아요?)*
 
-**6. CRM / tracker (공용 트래커)**
-> Is there a shared CRM or pipeline tracker I should plug my data into?
-> *(제 데이터를 넣을 공용 CRM이나 파이프라인 트래커 있어요?)*
+**5. Service area (서비스 영역)**
+> Which service area should my pod focus on? (IT servicing / SI / AI / manpower)
+> *(우리 팟 어느 서비스 영역에 집중해요?)*
 
-**7. Program timeline (기간)**
-> When does the program end, and when is the capstone presentation?
-> *(프로그램 언제 끝나요? 캡스톤 발표 언제예요?)*
+**6. ICP definition (ICP 누가 정하나)**
+> Who defines the ICP — the target criteria? I built it to be config-driven, so
+> once you tell me the profile, I just plug it in.
+> *(ICP(타겟 기준)는 누가 정해요? 설정 기반으로 만들어서, 알려주시면 바로 넣어요.)*
 
 ---
 
-## 🟢 Good to clarify (여유되면 / 상업화 시 중요)
+## 🟡 C. Data, delivery & logistics (이번 주 안에)
 
-**8. Contact data & privacy (연락처·개인정보)**
-> For storing decision-maker names and emails, is there a company policy on
-> personal-data handling I should follow?
-> *(담당자 이름·이메일 저장하는데, 개인정보 처리 관련 회사 방침 있어요?)*
+**7. Prototype or commercial? (검증 vs 상업)**
+> Is this a prototype, or used commercially right away? It changes the data source.
+> *(프로토타입이에요, 바로 상업적으로 써요? 데이터 소스가 갈려요.)*
 
-**9. Outreach compliance (메일 규제)**
-> Who handles the compliance side of cold outreach to Korean companies?
-> *(한국 기업 콜드 아웃리치 법적 컴플라이언스는 누가 챙겨요?)*
+**8. Delivery format (결과물 형식)**
+> The team works in spreadsheets, right? I can output a scored-leads sheet —
+> where should I deliver it (shared sheet / CRM)?
+> *(팀은 스프레드시트 쓰시죠? 점수 매긴 리드 시트로 뽑아드려요 — 어디로 드릴까요?)*
 
-**10. Setup (세팅)**
-> Am I in the Discord yet, and who is my buddy?
+**9. Outreach channel (채널)**
+> What channel for outreach — email or LinkedIn? Can replies be auto-tracked?
+> *(아웃리치 이메일? 링크드인? 응답 자동 추적 돼요?)*
+
+**10. Where my work lives (작업물 위치)**
+> I put my work in a private repo. Should it move to a company repo, or invite someone?
+> *(작업 private 레포에 올렸어요. 회사 레포로 옮길까요, 누구 초대할까요?)*
+
+**11. Timeline (기간)**
+> When does the program end, and when is the capstone?
+> *(프로그램 언제 끝나요? 캡스톤 언제예요?)*
+
+---
+
+## 🟢 D. Compliance & setup (여유되면 / 상업화 시 중요)
+
+**12. Personal data (개인정보)**
+> Any company policy for storing decision-maker names & emails?
+> *(담당자 이름·이메일 저장 관련 회사 방침 있어요?)*
+
+**13. Outreach compliance (메일 규제)**
+> Who handles compliance for cold outreach to Korean companies?
+> *(한국 기업 콜드 아웃리치 컴플라이언스는 누가 챙겨요?)*
+
+**14. Setup (세팅)**
+> Am I in the Discord yet, and who's my buddy?
 > *(디스코드 초대됐어요? 제 버디 누구예요?)*
 
 ---
@@ -64,9 +85,11 @@ Korean for you. (먼저 위쪽 필수 질문부터. 영어는 물어볼 말, 한
 ## ✅ Quick checklist (확인용)
 
 ```
-필수:  □1 트랙  □2 서비스영역  □3 방향확인  □4 프로토타입vs상업
-이번주: □5 채널  □6 CRM  □7 기간
-여유:  □8 개인정보  □9 컴플라이언스  □10 디스코드/버디
+A 내 위치:  □1 트랙  □2 팟구성  □3 분업
+B 방향:    □4 방향확인  □5 서비스영역  □6 ICP 누가정함
+C 이번주:  □7 프로토/상업  □8 결과형식  □9 채널  □10 레포  □11 기간
+D 여유:    □12 개인정보  □13 컴플라이언스  □14 디스코드/버디
 ```
 
-**Tip:** lead with "I built X, is this right?" (주도적) — not "what should I do?" (수동적).
+**If you only get to 3:** ask **#4 (direction), #5 (service area), #6 (ICP)** —
+those let the tool start producing real, correct results.
