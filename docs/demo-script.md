@@ -29,13 +29,21 @@ in order. English = what to say, 한국어 = meaning.
 
 *(담당자 연락처 찾으면 점수가 올라가요 — 70에서 90으로. 연락되는 리드가 먼저 와요.)*
 
-## ⑤ KPI funnel (dashboard.html 열며)
+## ⑤ AI outreach draft (초안 카드 가리키며)
+> "It even drafts a personalized Korean outreach message per lead. Template now,
+> and with an API key it uses Claude to write them. Every message is a draft that
+> gets approved before sending."
+
+*(리드마다 맞춤 한국어 메시지 초안까지 만들어요. 지금은 템플릿, 키 넣으면 Claude가 써요.
+모든 메시지는 승인 후 발송하는 초안이고요.)*
+
+## ⑥ KPI funnel (dashboard.html 열며)
 > "This is the KPI funnel from the playbook. It shows how many leads reach each
 > stage, and the conversion rate. It updates automatically."
 
 *(문서의 KPI 퍼널이에요. 단계별 도달 수랑 전환율을 보여줘요. 자동으로 갱신돼요.)*
 
-## ⑥ Honest closing (정직한 마무리 — 점수 따는 포인트)
+## ⑦ Honest closing (정직한 마무리 — 점수 따는 포인트)
 > "Right now it runs on sample data. With the API key, it works the same on real
 > companies. The scoring is a first version — I'll improve the weights using
 > real response data later."

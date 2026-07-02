@@ -7,8 +7,8 @@ know who to contact *first*.
 buying signal, and ranks them — so outreach starts with the best leads.
 
 ```
-  Saramin API  →  companies + hiring signal  →  lead score 0–100  →  ranked list
-  (job postings)      (open dev roles)          (fit + intent)       (who to contact first)
+  Saramin API  →  companies + hiring signal  →  lead score 0–100  →  ranked list  →  AI outreach draft
+  (job postings)      (open dev roles)          (fit + intent)       (who first)      (what to say)
 ```
 
 ## Live demo — ranked leads

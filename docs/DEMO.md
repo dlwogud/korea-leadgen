@@ -45,7 +45,11 @@ fintech/game → IT Servicing.
 **3. Contact lift** — once a decision-maker is found, the score rises
 (온누리페이 70 → 90), so reachable leads surface first.
 
-**4. KPI funnel** — leads by stage with stage-to-stage conversion (the capstone visual).
+**4. AI outreach draft** — a personalized Korean first-touch message per lead
+(template now; Claude when `ANTHROPIC_API_KEY` is set). Every one is a draft
+requiring approval before sending.
+
+**5. KPI funnel** — leads by stage with stage-to-stage conversion (the capstone visual).
 
 ---
 

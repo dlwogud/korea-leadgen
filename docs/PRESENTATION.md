@@ -6,10 +6,10 @@ Everything for the demo in one place. English = what to say, 한국어 = for you
 
 ## TL;DR — do this
 
-1. Open `data/overview.html` (screenshot / on screen)
+1. Open `data/overview.html` — top leads + service mix + **AI outreach draft** + funnel, all on one page
 2. Run `python3 scripts/demo.py` (live)
 3. Open `data/dashboard.html` (the funnel)
-4. Read the 6 lines below. Done.
+4. Read the 7 lines below. Done.
 
 ```bash
 cd ~/springboard/korea-leadgen
@@ -22,9 +22,10 @@ open data/dashboard.html
 
 ## 30-second pitch (memorise this)
 
-> "I built a data tool that finds Korean companies from job postings and ranks
-> them as leads by how well they fit our services. It's a working prototype on
-> sample data — when the API key arrives, it runs the same on real companies."
+> "I built a data tool that finds Korean companies from job postings, ranks
+> them as leads by how well they fit our services, and even drafts a
+> personalized outreach message for each. It's a working prototype on sample
+> data — when the API key arrives, it runs the same on real companies."
 
 *(채용공고로 한국 기업 찾아서 우리 서비스 적합도로 리드 순위 매기는 데이터 툴이에요.
 샘플 데이터로 도는 프로토타입이고, 키 오면 진짜 회사로 똑같이 작동해요.)*
@@ -45,10 +46,13 @@ open data/dashboard.html
 **4. Contact lift** — "When we add the decision-maker's contact, the score goes up, 70 to 90 — reachable leads come first."
 *(담당자 연락처 넣으면 점수 올라가요, 70→90. 연락되는 리드가 먼저.)*
 
-**5. Funnel** (dashboard.html) — "This is the KPI funnel from the playbook, with stage-by-stage conversion. It updates automatically."
+**5. AI outreach draft** — "It even drafts a personalized Korean outreach message per lead. This is a template now; with an API key it uses Claude to write them."
+*(리드마다 맞춤 한국어 메시지 초안까지 만들어요. 지금은 템플릿, 키 넣으면 Claude가 써줘요.)*
+
+**6. Funnel** (dashboard.html) — "This is the KPI funnel from the playbook, with stage-by-stage conversion. It updates automatically."
 *(문서의 KPI 퍼널이에요, 단계별 전환율. 자동 갱신돼요.)*
 
-**6. Close** — "It's ICP-based, so once we agree the target profile, it produces the right leads. And it takes data from the API or a manual list — same pipeline."
+**7. Close** — "It's ICP-based, so once we agree the target profile, it produces the right leads. And it takes data from the API or a manual list — same pipeline."
 *(ICP 기반이라 타겟 정해지면 맞는 리드 나와요. API든 수동 리스트든 같은 파이프라인이고요.)*
 
 ---
