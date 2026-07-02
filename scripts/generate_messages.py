@@ -22,6 +22,7 @@ import os
 from _common import DATA_DIR, RAW_CSV, load_dotenv
 
 DRAFTS_MD = DATA_DIR / "outreach_drafts.md"
+DRAFTS_CSV = DATA_DIR / "outreach_drafts.csv"
 
 # Value proposition per best-fit service (Korean)
 SERVICE_VALUE = {
@@ -114,20 +115,27 @@ def main() -> None:
     DATA_DIR.mkdir(exist_ok=True)
     lines = [f"# Outreach drafts — {mode} mode\n",
              "> DRAFTS. Every message must be approved by Jake / Mel / Rey before sending.\n"]
+    drafts = []
     for i, lead in enumerate(leads, 1):
         msg = claude_message(client, lead) if use_claude else template_message(lead)
+        service = SERVICE_LABEL.get(lead.get("best_service", ""), "")
         lines.append(f"\n## {i}. {lead.get('company_name','')} "
-                     f"(fit {lead.get('fit_score','')}, {SERVICE_LABEL.get(lead.get('best_service',''),'')})\n")
+                     f"(fit {lead.get('fit_score','')}, {service})\n")
         lines.append(f"```\n{msg}\n```\n")
+        drafts.append({"company_name": lead.get("company_name", ""),
+                       "fit_score": lead.get("fit_score", ""),
+                       "service": service, "mode": mode, "message": msg})
 
     DRAFTS_MD.write_text("\n".join(lines), encoding="utf-8")
-    print(f"[{mode}] wrote {len(leads)} drafts → data/outreach_drafts.md")
-    # console preview of the first one
-    if leads:
-        first = claude_message(client, leads[0]) if use_claude else template_message(leads[0])
+    with DRAFTS_CSV.open("w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=["company_name", "fit_score", "service", "mode", "message"])
+        w.writeheader()
+        w.writerows(drafts)
+    print(f"[{mode}] wrote {len(drafts)} drafts → data/outreach_drafts.md (+ .csv)")
+    if drafts:
         print("\n" + "-" * 60)
-        print(f"Sample draft — {leads[0].get('company_name','')}:\n")
-        print(first)
+        print(f"Sample draft — {drafts[0]['company_name']}:\n")
+        print(drafts[0]["message"])
 
 
 if __name__ == "__main__":

@@ -31,6 +31,7 @@ def _read(name):
 def main() -> None:
     leads = _read("scored_leads.csv")
     funnel = compute_funnel()
+    drafts = _read("outreach_drafts.csv")
 
     # top leads rows
     top_rows = ""
@@ -50,6 +51,18 @@ def main() -> None:
     mix_chips = "".join(
         f'<span class="chip">{SERVICE_LABELS.get(k,k)}: <b>{v}</b></span>'
         for k, v in sorted(mix.items(), key=lambda x: -x[1]) if k)
+
+    # outreach draft (show the top one)
+    draft_html = ""
+    if drafts:
+        d = drafts[0]
+        body = (d.get("message", "") or "").replace("<", "&lt;").replace("\n", "<br>")
+        draft_html = f"""
+  <div class="card"><h2>✉️ Sample AI-drafted outreach <span class="mode">({d.get('mode','')})</span></h2>
+    <div class="draftmeta">{d.get('company_name','')} · fit {d.get('fit_score','')} · {d.get('service','')}
+      <span class="badge">DRAFT — needs approval before sending</span></div>
+    <div class="draft">{body}</div>
+  </div>"""
 
     # funnel bars
     top = funnel[0]["count"] or 1
@@ -78,6 +91,10 @@ def main() -> None:
   .flabel{{width:160px;font-size:12px}} .ftrack{{flex:1;background:#eef1f5;border-radius:6px;height:20px;overflow:hidden}}
   .fbar{{height:100%;background:linear-gradient(90deg,#3b82f6,#2563eb);border-radius:6px}}
   .fnum{{width:90px;font-size:12px;font-weight:600}} .conv{{color:#9aa1ad;font-weight:400;font-size:11px}}
+  .mode{{color:#9aa1ad;font-weight:400;font-size:12px}}
+  .draftmeta{{font-size:12px;color:#6b7280;margin-bottom:8px}}
+  .badge{{background:#fef3c7;color:#92400e;border-radius:6px;padding:2px 8px;font-size:11px;margin-left:6px}}
+  .draft{{background:#f8fafc;border:1px solid #eef1f5;border-radius:8px;padding:14px 16px;font-size:13px;line-height:1.7;white-space:normal}}
 </style></head><body><div class="wrap">
   <h1>Korea Lead-Gen — Overview</h1>
   <div class="sub">ICP-based sourcing → scoring → funnel. Sample data (same with the live API key).</div>
@@ -87,7 +104,7 @@ def main() -> None:
     {top_rows}</table></div>
 
   <div class="card"><h2>🧩 Leads by best-fit service</h2>{mix_chips}</div>
-
+{draft_html}
   <div class="card"><h2>📊 KPI funnel</h2>{fbars}</div>
 </div></body></html>"""
 
