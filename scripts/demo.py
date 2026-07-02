@@ -95,6 +95,7 @@ def main() -> None:
     run("make_contact_worksheet.py", "--top", "8")
     fill_some_contacts()
     run("rescore_with_contacts.py")
+    run("generate_messages.py", "--top", "3")
     seed_pipeline_events()
     run("dashboard.py")
     run("overview.py")

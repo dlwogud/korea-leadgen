@@ -93,6 +93,7 @@ field mappings are marked `# VERIFY` until run against a live key.
 - [x] Funnel logging + dashboard (`log_event.py`, `dashboard.py` → terminal + HTML)
 - [x] Living DB: tech-stack signal + per-service fit (all 4) + first/last_seen (`enrich.py`)
 - [x] Real SQLite database + SQL queries (`build_db.py`, `query_db.py`, `db/schema_sqlite.sql`)
+- [x] AI-track: personalized outreach draft per lead (`generate_messages.py` — template now, Claude when `ANTHROPIC_API_KEY` set)
 - [x] One-command demo on sample data (`demo.py`)
 - [ ] Add free Saramin key and run on real postings
 - [ ] Firmographic enrichment via DART (company size — still a placeholder)
