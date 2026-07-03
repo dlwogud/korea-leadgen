@@ -1,98 +1,74 @@
-# Data-Side Progress Report — Korea Lead-Gen Prototype
+# Lead-Gen Pipeline — Status Summary
 
-A data pipeline that finds Korean companies, ranks them as leads for our four
-services, and drafts outreach — end to end. Running on sample data now; built so
-the same code runs on live data the moment the Saramin API key arrives.
+**Status:** Prototype — built and running end-to-end on sample data, not yet
+validated on real leads.
 
----
+## 1. Sourcing
+- **Primary: Saramin API** (free tier, applied for — a few days out). ICP-driven
+  search covers role/title variants, not just exact keywords, filtered by
+  Saramin's IT job category.
+- **Fallback if Saramin API is unavailable:** the **public-data portal
+  (data.go.kr)** — e.g. WorkNet job postings — as a Plan B source.
+- **Manual import:** any company list from the business team (Korean/English
+  columns auto-detected) runs through the same pipeline.
+- **Dedup:** by company and by posting, to avoid double-counting across searches.
 
-## Pipeline — how it works, stage by stage
+## 2. ICP Config (single source of truth)
+`config/icp.json` defines, per service area (IT servicing / manpower / AI / SI):
+search keywords, target industries, buying-signal terms, regions, and scoring
+weights. Drives both search and scoring — updating the target profile requires
+only editing this file, no code changes.
 
-**1. Sourcing — where the companies come from**
-- Primary: **Saramin** (one of Korea's two largest job boards) via its free API.
-  Driven by the ICP config — searches the right roles and can filter by Saramin's
-  IT job *category*, so it catches title variants (백엔드 / Java 개발자 / API
-  Engineer …), not just exact keywords.
-- **Manual import**: takes any company list the business track hands over (a
-  spreadsheet; Korean or English column names auto-detected) and runs it through
-  the exact same pipeline — so we're not locked to one source.
-- **Commercial-safe alternative**: a WorkNet (Korean public-data) source is
-  scaffolded for if/when this goes commercial.
-- **Dedup**: by company and by posting, so a company found under several searches
-  isn't double-counted.
+## 3. Enrichment
+- Extracts tech stack per company from postings (Java, AWS, React, PyTorch, etc.)
+- Scores fit across all four services, selects best-fit one.
+- Living database: reruns merge new data with first-seen/last-seen timestamps
+  rather than overwriting.
 
-**2. ICP config — the single source of truth**
-- One file (`config/icp.json`) defines, per service area (IT servicing / manpower
-  / AI / systems integration): search keywords, target industries, buying-signal
-  terms, target regions, and scoring weights.
-- It drives BOTH what we search AND how we score. When the team confirms the real
-  target profile, we edit this one file — no code changes.
+## 4. Lead Scoring
+0–100 = 40% firmographic fit + 40% hiring-signal strength + 20% reachability
+(decision-maker contact on file). Fully explainable — every score traces to
+evidence.
 
-**3. Enrichment — raw postings → a usable record**
-- Extracts each company's **tech stack** from its postings (Java, AWS, React,
-  PyTorch …).
-- Scores **fit for all four services** and picks the best-fit one.
-- Maintains a **living database**: re-running merges new data and stamps
-  first-seen / last-seen, so it stays current instead of overwriting.
+## 5. Contact Enrichment
+Manual step — a research worksheet lists top leads; once a decision-maker
+(name/email/LinkedIn) is added by hand, that lead's reachability score rises,
+surfacing reachable leads first.
 
-**4. Lead scoring — who to contact first**
-- Score **0–100** = 40% firmographic fit + 40% hiring-signal strength + 20%
-  reachability (do we have a decision-maker contact).
-- Fully **explainable** — every score traces back to its evidence.
+## 6. AI Outreach Draft
+Personalized Korean first-touch message per lead, tailored to hiring signal +
+best-fit service. Template-based by default; uses Claude if an API key is set.
+All drafts require Jake/Mel/Rey approval before sending.
 
-**5. Contact enrichment**
-- Produces a research worksheet of the top leads; once a decision-maker
-  (name / email / LinkedIn) is added, that lead's score rises, so **reachable
-  leads surface first**.
+## 7. KPI Funnel Dashboard
+8-stage funnel (per playbook §6.1) with stage-to-stage conversion, auto-generated
+as an HTML dashboard.
 
-**6. AI outreach draft**
-- A **personalized Korean first-touch message per lead**, tailored to its hiring
-  signal and best-fit service. Template-based now; uses Claude to write them when
-  an API key is set. Every message is a **draft** requiring Jake / Mel / Rey
-  approval before sending.
+## 8. Database
+SQLite backend, queryable via SQL (top leads, service breakdown, funnel), retains
+history.
 
-**7. KPI funnel dashboard**
-- The 8-stage funnel from the playbook (§6.1), with stage-to-stage conversion,
-  auto-generated as an HTML dashboard.
+## 9. Demo
+`python3 scripts/demo.py` runs the full pipeline on sample data. `overview.html`
+shows top leads, service mix, a sample outreach draft, and the funnel on one
+screenshot-ready page. Private GitHub repo; live demo available anytime.
 
-**8. Database + history**
-- Everything loads into a **SQLite** database — queryable with SQL (top leads,
-  service breakdown, funnel) and keeps history.
+## Open Questions for the Team
+- Which service area to prioritize?
+- Who owns the ICP definition? (config-driven — can plug in immediately)
+- Delivery target for results — shared sheet or CRM?
+- **Confirmed:** prototype-only for now — not commercial. Data source stays
+  Saramin (with the **public-data portal** as backup) rather than a licensed source.
 
-**9. Demo + overview page**
-- `python3 scripts/demo.py` runs the whole pipeline on sample data.
-- `overview.html` shows top leads + service mix + a sample outreach draft + the
-  funnel **on one page** (screenshot-ready). All in a private GitHub repo; live
-  demo anytime.
+## Next Steps
+- Run against real Saramin postings once the key lands.
+- Company-size enrichment (**public-data portal** or DART) + manual contact enrichment.
+- Week 2+: weekly response/conversion analysis, feeding real replies back into the
+  scoring model.
 
----
-
-## Current status
-
-- Everything above is **built and runs end to end on sample data**.
-- Waiting on the free **Saramin API key** (applied — a few days out). The same
-  code runs on real Korean companies the moment it lands.
-- Scoring is a **v1 heuristic**; it'll be re-weighted with real response data once
-  outreach starts (Week 2+).
-
-## Would help to confirm (from the team)
-
-- Which **service area** should we target?
-- Who sets the **ICP** (the target profile)? — it's config-driven, so I can plug
-  it in immediately.
-- Where should results be **delivered** — a shared sheet / CRM?
-- **Prototype-only or heading to commercial use?** (changes the data source.)
-
-## Next steps
-
-- Run on real Saramin postings once the key arrives.
-- Company-size enrichment (DART) + contact enrichment.
-- Week 2+: weekly response / conversion analysis, and feed real replies back into
-  the scoring model.
-
-## Honest notes
-
-- Sample data + a v1 heuristic — proven end to end, not yet validated against
-  reality.
-- Saramin's free API is for the prototype; commercial deployment would use a
-  licensed / public-data source (the source layer is swappable).
+## Honest Notes
+- Currently sample data + v1 heuristic scoring — proven end-to-end, not yet
+  validated against real outreach results.
+- Contact enrichment remains a manual step by design at this stage.
+- Data-source layer is swappable; Saramin free API (or the public-data portal as
+  backup) is a prototype choice, not a commercial-grade source.
