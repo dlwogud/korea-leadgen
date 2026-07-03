@@ -1,28 +1,39 @@
 {
-  "_about": "The ICP (Ideal Customer Profile) for each service area, in one place. This drives BOTH sourcing (which keywords to search) AND scoring (how well a company fits). These values are HYPOTHESES — edit them once the team/mentor confirm the real ICP. No code changes needed.",
+  "_about": "The ICP (Ideal Customer Profile) for each service area, in one place. Drives BOTH sourcing (which keywords to search) AND scoring (how well a company fits). Values below reflect the confirmed initial ICP from the team (2026-07): Korean SMEs & mid-market tech/IT companies with acute developer/IT talent shortages.",
+  "_priority": "IT servicing + manpower placement (per the team). AI / SI kept for completeness but not the current focus.",
+  "_confirmed_icp": {
+    "firm_size_employees": "20-300 (segment under the most acute hiring pressure)",
+    "industries": "tech-enabled: SaaS, fintech, gaming, e-commerce platforms, IT services / system integrators (NOT heavy manufacturing or chaebol-adjacent)",
+    "roles_needed": "mid-level dev / QA / DevOps / customer support (CX) / back-office ops — expensive or slow to fill domestically, no Korea-specific licensing",
+    "buying_trigger": "actively hiring but blocked by cost/time-to-fill; e.g. roles open 60+ days on Korean job boards, or public hiring-headwind statements",
+    "decision_maker": "Founder/COO (smaller); Head of HR or Head of Engineering (100-300) — not CHRO or procurement",
+    "warm_lead_layer": "companies already outsourcing offshore (Vietnam/Cambodia) — primed to compare the Philippines"
+  },
   "_fit_formula": "fit = 100 * (w.signal*signal_fit + w.intent*intent + w.region*region_fit). signal_fit = 1.0 if the company's industry is in target_industries OR a signal_term appears in its job titles/tech, else 0.3. intent = min(1, hiring_count/5). region_fit = 1.0 if a target_region matches, else 0.5.",
 
   "services": {
     "it_servicing": {
       "label": "IT Tech Servicing",
-      "keywords": ["백엔드", "프론트엔드", "서버 개발", "데이터 엔지니어", "DevOps", "시스템 엔지니어", "QA", "테스트 엔지니어", "기술지원"],
-      "target_industries": ["IT", "정보통신", "소프트웨어", "솔루션", "플랫폼", "게임", "인터넷", "모바일", "핀테크", "이커머스", "헬스케어", "보안", "SI"],
+      "keywords": ["백엔드", "프론트엔드", "서버 개발", "데이터 엔지니어", "DevOps", "QA", "테스트 엔지니어", "기술지원", "고객지원", "CS", "운영"],
+      "target_industries": ["SaaS", "소프트웨어", "핀테크", "게임", "이커머스", "플랫폼", "IT", "정보통신", "인터넷", "모바일", "SI", "스타트업"],
       "signal_terms": [],
       "target_regions": ["서울", "경기", "인천"],
+      "firm_size_employees": [20, 300],
       "min_hiring": 2,
       "weights": {"signal": 0.40, "intent": 0.40, "region": 0.20}
     },
     "manpower": {
       "label": "Skilled Manpower Placement",
-      "keywords": ["백엔드", "프론트엔드", "서버 개발", "QA", "시스템 엔지니어", "기술지원"],
-      "target_industries": ["IT", "정보통신", "소프트웨어", "솔루션", "플랫폼", "게임", "인터넷", "모바일", "핀테크", "이커머스", "보안", "SI"],
+      "keywords": ["백엔드", "프론트엔드", "서버 개발", "QA", "DevOps", "기술지원", "고객지원", "CS", "운영", "백오피스"],
+      "target_industries": ["SaaS", "소프트웨어", "핀테크", "게임", "이커머스", "플랫폼", "IT", "정보통신", "인터넷", "모바일", "SI", "스타트업"],
       "signal_terms": [],
       "target_regions": ["서울", "경기", "인천"],
+      "firm_size_employees": [20, 300],
       "min_hiring": 3,
       "weights": {"signal": 0.35, "intent": 0.45, "region": 0.20}
     },
     "ai_implementation": {
-      "label": "AI Implementation",
+      "label": "AI Implementation (not current priority)",
       "keywords": ["AI 엔지니어", "머신러닝", "ML 엔지니어", "데이터 사이언티스트", "MLOps"],
       "_note": "target_industries intentionally empty — AI-Implementation fit is driven by actual AI signals (AI/ML in postings/tech), not by being a software company.",
       "target_industries": [],
@@ -32,7 +43,7 @@
       "weights": {"signal": 0.60, "intent": 0.20, "region": 0.20}
     },
     "systems_integration": {
-      "label": "Systems Integration",
+      "label": "Systems Integration (not current priority)",
       "keywords": ["ERP", "SAP", "시스템 통합", "클라우드 마이그레이션", "인프라 엔지니어"],
       "target_industries": ["제조", "유통", "물류", "금융", "은행", "보험", "공공", "건설", "의료"],
       "signal_terms": ["ERP", "SAP", "Oracle", "마이그레이션", "클라우드 전환", "SI", "시스템 통합", "레거시"],
