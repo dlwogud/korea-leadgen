@@ -32,6 +32,7 @@ def main() -> None:
     leads = _read("scored_leads.csv")
     funnel = compute_funnel()
     drafts = _read("outreach_drafts.csv")
+    quals = _read("qualified_leads.csv")
 
     # top leads rows
     top_rows = ""
@@ -51,6 +52,24 @@ def main() -> None:
     mix_chips = "".join(
         f'<span class="chip">{SERVICE_LABELS.get(k,k)}: <b>{v}</b></span>'
         for k, v in sorted(mix.items(), key=lambda x: -x[1]) if k)
+
+    # AI qualification (verdicts + reasons)
+    qual_html = ""
+    if quals:
+        icon = {"fit": "✅", "maybe": "🟡", "not_fit": "❌"}
+        items = ""
+        for q in quals[:5]:
+            v = q.get("verdict", "")
+            reason = (q.get("reason", "") or "").replace("<", "&lt;")
+            items += (f'<div class="qrow"><span class="qbadge">{icon.get(v,"?")} '
+                      f'{q.get("company_name","")}</span> '
+                      f'<span class="qconf">{v} · {q.get("confidence","")}</span>'
+                      f'<div class="qreason">{reason}</div></div>')
+        qual_html = f"""
+  <div class="card"><h2>🤖 AI lead qualification <span class="mode">(Claude)</span></h2>
+    <div class="draftmeta">Claude judges each company against the ICP, with a reason.</div>
+    {items}
+  </div>"""
 
     # outreach draft (show the top one)
     draft_html = ""
@@ -95,6 +114,9 @@ def main() -> None:
   .draftmeta{{font-size:12px;color:#6b7280;margin-bottom:8px}}
   .badge{{background:#fef3c7;color:#92400e;border-radius:6px;padding:2px 8px;font-size:11px;margin-left:6px}}
   .draft{{background:#f8fafc;border:1px solid #eef1f5;border-radius:8px;padding:14px 16px;font-size:13px;line-height:1.7;white-space:normal}}
+  .qrow{{padding:8px 0;border-bottom:1px solid #f3f4f6}}
+  .qbadge{{font-size:13px;font-weight:600}} .qconf{{color:#9aa1ad;font-size:11px;margin-left:6px}}
+  .qreason{{font-size:12px;color:#6b7280;margin-top:3px;line-height:1.5}}
 </style></head><body><div class="wrap">
   <h1>Korea Lead-Gen — Overview</h1>
   <div class="sub">ICP-based sourcing → scoring → funnel. Sample data (same with the live API key).</div>
@@ -104,6 +126,7 @@ def main() -> None:
     {top_rows}</table></div>
 
   <div class="card"><h2>🧩 Leads by best-fit service</h2>{mix_chips}</div>
+{qual_html}
 {draft_html}
   <div class="card"><h2>📊 KPI funnel</h2>{fbars}</div>
 </div></body></html>"""
