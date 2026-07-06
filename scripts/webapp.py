@@ -57,34 +57,37 @@ def build_dataset() -> list[dict]:
     return rows
 
 
+# Plain string (NOT an f-string / .format()) — only __DATA__ is substituted,
+# so all CSS/JS braces are single.
 HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Korea Lead-Gen — Leads</title><style>
-  :root{{--bd:#eef1f5;--mut:#6b7280;--blue:#2563eb}}
-  *{{box-sizing:border-box}}
-  body{{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#f6f7f9;color:#1f2430;margin:0;padding:24px}}
-  .wrap{{max-width:1100px;margin:0 auto}}
-  h1{{font-size:20px;margin:0 0 2px}} .sub{{color:var(--mut);font-size:13px;margin-bottom:16px}}
-  .tools{{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}}
-  input,select{{padding:8px 10px;border:1px solid var(--bd);border-radius:8px;font-size:13px;background:#fff}}
-  input{{flex:1;min-width:180px}}
-  .layout{{display:flex;gap:16px;align-items:flex-start}}
-  .card{{background:#fff;border-radius:12px;box-shadow:0 2px 14px rgba(0,0,0,.06)}}
-  .list{{flex:1;overflow:hidden}} .detail{{flex:1;padding:20px 22px;position:sticky;top:24px}}
-  table{{width:100%;border-collapse:collapse;font-size:13px}}
-  th{{text-align:left;color:#9aa1ad;font-weight:600;padding:10px 12px;border-bottom:1px solid var(--bd);cursor:pointer;user-select:none}}
-  td{{padding:9px 12px;border-bottom:1px solid #f3f4f6}}
-  tr.row{{cursor:pointer}} tr.row:hover{{background:#f8fafc}} tr.sel{{background:#eff6ff}}
-  .score{{font-weight:700;color:var(--blue)}}
-  .chip{{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:20px;padding:2px 9px;font-size:11px}}
-  .v-fit{{color:#059669}} .v-maybe{{color:#b45309}} .v-not_fit{{color:#dc2626}}
-  .detail h2{{font-size:16px;margin:0 0 2px}} .detail .meta{{color:var(--mut);font-size:12px;margin-bottom:14px}}
-  .sec{{margin:14px 0}} .sec .lbl{{font-size:11px;color:#9aa1ad;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}}
-  .badge{{font-weight:700;font-size:14px}} .reason{{font-size:13px;color:#374151;line-height:1.6;margin-top:4px}}
-  .msg{{background:#f8fafc;border:1px solid var(--bd);border-radius:8px;padding:14px;font-size:13px;line-height:1.7;white-space:pre-wrap}}
-  .kv{{font-size:13px;line-height:1.8}} .kv b{{color:#374151}}
-  .empty{{color:#9aa1ad;font-size:12px}}
-  @media(max-width:820px){{.layout{{flex-direction:column}}.detail{{position:static}}}}
+  :root{--bd:#eef1f5;--mut:#6b7280;--blue:#2563eb}
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#f6f7f9;color:#1f2430;margin:0;padding:24px}
+  .wrap{max-width:1100px;margin:0 auto}
+  h1{font-size:20px;margin:0 0 2px}
+  .sub{color:var(--mut);font-size:13px;margin-bottom:16px}
+  .tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  input,select{padding:8px 10px;border:1px solid var(--bd);border-radius:8px;font-size:13px;background:#fff}
+  input{flex:1;min-width:180px}
+  .layout{display:flex;gap:16px;align-items:flex-start}
+  .card{background:#fff;border-radius:12px;box-shadow:0 2px 14px rgba(0,0,0,.06)}
+  .list{flex:1;overflow:hidden} .detail{flex:1;padding:20px 22px;position:sticky;top:24px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:#9aa1ad;font-weight:600;padding:10px 12px;border-bottom:1px solid var(--bd);cursor:pointer;user-select:none}
+  td{padding:9px 12px;border-bottom:1px solid #f3f4f6}
+  tr.row{cursor:pointer} tr.row:hover{background:#f8fafc} tr.sel{background:#eff6ff}
+  .score{font-weight:700;color:var(--blue)}
+  .chip{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:20px;padding:2px 9px;font-size:11px}
+  .v-fit{color:#059669} .v-maybe{color:#b45309} .v-not_fit{color:#dc2626}
+  .detail h2{font-size:16px;margin:0 0 2px} .detail .meta{color:var(--mut);font-size:12px;margin-bottom:14px}
+  .sec{margin:14px 0} .sec .lbl{font-size:11px;color:#9aa1ad;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
+  .badge{font-weight:700;font-size:14px} .reason{font-size:13px;color:#374151;line-height:1.6;margin-top:4px}
+  .msg{background:#f8fafc;border:1px solid var(--bd);border-radius:8px;padding:14px;font-size:13px;line-height:1.7;white-space:pre-wrap}
+  .kv{font-size:13px;line-height:1.8} .kv b{color:#374151}
+  .empty{color:#9aa1ad;font-size:12px}
+  @media(max-width:820px){.layout{flex-direction:column}.detail{position:static}}
 </style></head><body><div class="wrap">
   <h1>Korea Lead-Gen — Leads</h1>
   <div class="sub" id="summary"></div>
@@ -105,62 +108,63 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 </div>
 <script>
 const DATA = __DATA__;
-const SVC = {{it_servicing:"IT Servicing", manpower:"Manpower", ai_implementation:"AI Implementation", systems_integration:"Systems Integration"}};
-const VICON = {{fit:"✅", maybe:"🟡", not_fit:"❌"}};
+const SVC = {it_servicing:"IT Servicing", manpower:"Manpower", ai_implementation:"AI Implementation", systems_integration:"Systems Integration"};
+const VICON = {fit:"✅", maybe:"🟡", not_fit:"❌"};
 let sortKey="fit", sortDir=-1, selected=null;
 const esc = s => (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const svc = document.getElementById("svc"), q = document.getElementById("q"), vd = document.getElementById("vd");
 
-// populate service filter
-[...new Set(DATA.map(d=>d.service).filter(Boolean))].forEach(s=>{{
-  const o=document.createElement("option");o.value=s;o.textContent=SVC[s]||s;svc.appendChild(o);}});
+[...new Set(DATA.map(d=>d.service).filter(Boolean))].forEach(s=>{
+  const o=document.createElement("option");o.value=s;o.textContent=SVC[s]||s;svc.appendChild(o);});
 
-function sortBy(k){{ sortDir = (sortKey===k)? -sortDir : (k==="fit"?-1:1); sortKey=k; render(); }}
+function sortBy(k){ sortDir = (sortKey===k)? -sortDir : (k==="fit"?-1:1); sortKey=k; render(); }
 
-function filtered(){{
+function filtered(){
   const term=q.value.toLowerCase(), fs=svc.value, fv=vd.value;
   return DATA.filter(d=>(!term||d.company.toLowerCase().includes(term))
     &&(!fs||d.service===fs)&&(!fv||d.verdict===fv))
-    .sort((a,b)=>{{const x=a[sortKey],y=b[sortKey];return (x>y?1:x<y?-1:0)*sortDir;}});
-}}
+    .sort((a,b)=>{const x=a[sortKey],y=b[sortKey];return (x>y?1:x<y?-1:0)*sortDir;});
+}
 
-function render(){{
+function render(){
   const rows=filtered();
   document.getElementById("summary").textContent =
-    `${{rows.length}} of ${{DATA.length}} leads · ICP-based scoring + AI qualification + AI outreach draft`;
-  document.getElementById("rows").innerHTML = rows.map(d=>`
-    <tr class="row ${{selected===d.company?'sel':''}}" onclick="select('${{d.company.replace(/'/g,"\\\\'")}}')">
-      <td class="score">${{Math.round(d.fit)}}</td><td>${{esc(d.company)}}</td>
-      <td><span class="chip">${{SVC[d.service]||d.service||'-'}}</span></td>
-      <td>${{d.hiring||'-'}}</td>
-      <td class="v-${{d.verdict}}">${{VICON[d.verdict]||''}} ${{d.verdict||'-'}}</td></tr>`).join("")
-    || `<tr><td colspan=5 class="empty" style="padding:20px">No matches.</td></tr>`;
+    rows.length+" of "+DATA.length+" leads · ICP scoring + AI qualification + AI outreach draft";
+  document.getElementById("rows").innerHTML = rows.map(d=>
+    '<tr class="row '+(selected===d.company?'sel':'')+'" onclick="select(\\''+d.company.replace(/'/g,"\\\\'")+'\\')">'
+    +'<td class="score">'+Math.round(d.fit)+'</td><td>'+esc(d.company)+'</td>'
+    +'<td><span class="chip">'+(SVC[d.service]||d.service||'-')+'</span></td>'
+    +'<td>'+(d.hiring||'-')+'</td>'
+    +'<td class="v-'+d.verdict+'">'+(VICON[d.verdict]||'')+' '+(d.verdict||'-')+'</td></tr>').join("")
+    || '<tr><td colspan=5 class="empty" style="padding:20px">No matches.</td></tr>';
   if(rows.length && !rows.find(r=>r.company===selected)) select(rows[0].company); else drawDetail();
-}}
+}
 
-function select(name){{ selected=name; render(); }}
+function select(name){ selected=name; render(); }
 
-function drawDetail(){{
+function drawDetail(){
   const d = DATA.find(x=>x.company===selected);
   const el=document.getElementById("detail");
-  if(!d){{ el.innerHTML=`<div class="empty">Select a lead.</div>`; return; }}
-  const contact = d.contact_name ? `<div class="kv"><b>${{esc(d.contact_name)}}</b> ${{esc(d.contact_title)}}<br>
-    ${{d.email?esc(d.email)+"<br>":""}}${{d.linkedin?esc(d.linkedin):""}}</div>`
-    : `<div class="empty">No decision-maker contact yet.</div>`;
-  el.innerHTML = `
-    <h2>${{esc(d.company)}}</h2>
-    <div class="meta">${{esc(d.industry)}} · ${{esc(d.region)}} · ${{d.hiring||0}} openings</div>
-    <div class="sec"><div class="lbl">Fit score</div>
-      <span class="score" style="font-size:22px">${{Math.round(d.fit)}}</span> / 100
-      &nbsp;<span class="chip">${{SVC[d.service]||d.service||'-'}}</span></div>
-    <div class="sec"><div class="lbl">🤖 AI qualification</div>
-      <span class="badge v-${{d.verdict}}">${{VICON[d.verdict]||''}} ${{d.verdict||'-'}}</span>
-      <span class="empty">(${{d.confidence||'-'}})</span>
-      <div class="reason">${{esc(d.reason)||'<span class=empty>not qualified yet</span>'}}</div></div>
-    <div class="sec"><div class="lbl">Tech stack</div><div class="kv">${{esc(d.tech)||'<span class=empty>—</span>'}}</div></div>
-    <div class="sec"><div class="lbl">Contact</div>${{contact}}</div>
-    <div class="sec"><div class="lbl">✉️ AI outreach draft</div>
-      ${{d.message?`<div class="msg">${{esc(d.message)}}</div>`:'<div class="empty">no draft yet — run generate_messages.py</div>'}}</div>`;
-}}
+  if(!d){ el.innerHTML='<div class="empty">Select a lead.</div>'; return; }
+  const contact = d.contact_name
+    ? '<div class="kv"><b>'+esc(d.contact_name)+'</b> '+esc(d.contact_title)+'<br>'
+      +(d.email?esc(d.email)+"<br>":"")+(d.linkedin?esc(d.linkedin):"")+'</div>'
+    : '<div class="empty">No decision-maker contact yet.</div>';
+  el.innerHTML =
+    '<h2>'+esc(d.company)+'</h2>'
+    +'<div class="meta">'+esc(d.industry)+' · '+esc(d.region)+' · '+(d.hiring||0)+' openings</div>'
+    +'<div class="sec"><div class="lbl">Fit score</div>'
+      +'<span class="score" style="font-size:22px">'+Math.round(d.fit)+'</span> / 100 '
+      +'&nbsp;<span class="chip">'+(SVC[d.service]||d.service||'-')+'</span></div>'
+    +'<div class="sec"><div class="lbl">🤖 AI qualification</div>'
+      +'<span class="badge v-'+d.verdict+'">'+(VICON[d.verdict]||'')+' '+(d.verdict||'-')+'</span> '
+      +'<span class="empty">('+(d.confidence||'-')+')</span>'
+      +'<div class="reason">'+(esc(d.reason)||'<span class=empty>not qualified yet</span>')+'</div></div>'
+    +'<div class="sec"><div class="lbl">Tech stack</div><div class="kv">'+(esc(d.tech)||'<span class=empty>—</span>')+'</div></div>'
+    +'<div class="sec"><div class="lbl">Contact</div>'+contact+'</div>'
+    +'<div class="sec"><div class="lbl">✉️ AI outreach draft</div>'
+      +(d.message?'<div class="msg">'+esc(d.message)+'</div>':'<div class="empty">no draft yet — run generate_messages.py</div>')+'</div>';
+}
 render();
 </script></body></html>"""
 
