@@ -36,7 +36,7 @@ SYSTEM = (
     "You qualify B2B leads for Springboard Philippines, which supplies vetted "
     "Filipino IT talent and services to Korean companies. Given one company, "
     "judge how well it fits the Ideal Customer Profile below. Be strict — only "
-    "'fit' when it genuinely matches. Give the reason in Korean, one or two "
+    "'fit' when it genuinely matches. Give the reason in English, one or two "
     "sentences.\n\n" + ICP_TEXT
 )
 
@@ -87,12 +87,12 @@ def qualify_rule(company: dict) -> dict:
     is_tech = any(h in industry for h in TECH_INDUSTRY_HINTS) or bool(company.get("tech_stack"))
     if is_tech and hiring >= 3:
         return {"verdict": "fit", "confidence": "medium",
-                "reason": "테크 기업이고 개발 인력을 여러 명 채용 중이라 인력난 신호가 있음 (규칙 기반 추정)."}
+                "reason": "Tech company hiring several engineers — a clear talent-shortage signal (rule-based estimate)."}
     if is_tech and hiring >= 1:
         return {"verdict": "maybe", "confidence": "low",
-                "reason": "테크 기업이나 채용 규모가 작아 인력난 신호가 약함 (규칙 기반 추정)."}
+                "reason": "Tech company but few openings, so the hiring-pressure signal is weak (rule-based estimate)."}
     return {"verdict": "not_fit", "confidence": "medium",
-            "reason": "테크 기업이 아니거나 개발 채용 신호가 없어 ICP에서 벗어남 (규칙 기반 추정)."}
+            "reason": "Not a tech company or no dev-hiring signal, so it's outside the ICP (rule-based estimate)."}
 
 
 def main() -> None:

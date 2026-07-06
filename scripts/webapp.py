@@ -63,37 +63,45 @@ def build_dataset() -> list[dict]:
 HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Korea Lead-Gen — Leads</title><style>
-  :root{--bd:#eef1f5;--mut:#6b7280;--blue:#2563eb}
+  :root{--bd:#edeff3;--mut:#6b7280;--faint:#9ca3af;--ink:#111827;--accent:#4f46e5}
   *{box-sizing:border-box}
-  body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#f6f7f9;color:#1f2430;margin:0;padding:24px}
-  .wrap{max-width:1100px;margin:0 auto}
-  h1{font-size:20px;margin:0 0 2px}
-  .sub{color:var(--mut);font-size:13px;margin-bottom:16px}
-  .tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-  input,select{padding:8px 10px;border:1px solid var(--bd);border-radius:8px;font-size:13px;background:#fff}
-  input{flex:1;min-width:180px}
+  body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:#f4f5f8;color:var(--ink);margin:0;padding:32px 20px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto}
+  .head{margin-bottom:18px}
+  h1{font-size:22px;font-weight:700;margin:0 0 3px;letter-spacing:-.01em}
+  .sub{color:var(--mut);font-size:13px}
+  .stats{display:flex;gap:12px;margin:16px 0}
+  .stat{flex:1;background:#fff;border-radius:14px;padding:14px 18px;box-shadow:0 1px 3px rgba(16,24,40,.06)}
+  .stat .n{font-size:22px;font-weight:700;letter-spacing:-.02em} .stat .l{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+  .tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  input,select{padding:9px 12px;border:1px solid var(--bd);border-radius:10px;font-size:13px;background:#fff;color:var(--ink);outline:none}
+  input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+  input{flex:1;min-width:200px}
   .layout{display:flex;gap:16px;align-items:flex-start}
-  .card{background:#fff;border-radius:12px;box-shadow:0 2px 14px rgba(0,0,0,.06)}
-  .list{flex:1;overflow:hidden} .detail{flex:1;padding:20px 22px;position:sticky;top:24px}
+  .card{background:#fff;border-radius:16px;box-shadow:0 1px 3px rgba(16,24,40,.06),0 1px 2px rgba(16,24,40,.04)}
+  .list{flex:1.1;overflow:hidden} .detail{flex:1;padding:22px 24px;position:sticky;top:32px}
   table{width:100%;border-collapse:collapse;font-size:13px}
-  th{text-align:left;color:#9aa1ad;font-weight:600;padding:10px 12px;border-bottom:1px solid var(--bd);cursor:pointer;user-select:none}
-  td{padding:9px 12px;border-bottom:1px solid #f3f4f6}
-  tr.row{cursor:pointer} tr.row:hover{background:#f8fafc} tr.sel{background:#eff6ff}
-  .score{font-weight:700;color:var(--blue)}
-  .chip{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:20px;padding:2px 9px;font-size:11px}
-  .v-fit{color:#059669} .v-maybe{color:#b45309} .v-not_fit{color:#dc2626}
-  .detail h2{font-size:16px;margin:0 0 2px} .detail .meta{color:var(--mut);font-size:12px;margin-bottom:14px}
-  .sec{margin:14px 0} .sec .lbl{font-size:11px;color:#9aa1ad;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
-  .badge{font-weight:700;font-size:14px} .reason{font-size:13px;color:#374151;line-height:1.6;margin-top:4px}
-  .msg{background:#f8fafc;border:1px solid var(--bd);border-radius:8px;padding:14px;font-size:13px;line-height:1.7;white-space:pre-wrap}
-  .kv{font-size:13px;line-height:1.8} .kv b{color:#374151}
-  .empty{color:#9aa1ad;font-size:12px}
-  .joblink{display:inline-block;background:#2563eb;color:#fff;text-decoration:none;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600}
-  .joblink:hover{background:#1d4ed8}
+  th{text-align:left;color:var(--faint);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:12px 16px;border-bottom:1px solid var(--bd);cursor:pointer;user-select:none}
+  td{padding:12px 16px;border-bottom:1px solid #f4f5f7;vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr.row{cursor:pointer;transition:background .1s} tr.row:hover{background:#fafbfc} tr.sel{background:#f5f3ff;box-shadow:inset 3px 0 0 var(--accent)}
+  .score{font-weight:700;color:var(--accent);font-size:15px}
+  .chip{display:inline-block;background:#eef2ff;color:#4338ca;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:500}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+  .pill-fit{background:#dcfce7;color:#15803d} .pill-maybe{background:#fef3c7;color:#b45309} .pill-not_fit{background:#fee2e2;color:#b91c1c} .pill-{background:#f3f4f6;color:#9ca3af}
+  .detail h2{font-size:18px;font-weight:700;margin:0 0 3px;letter-spacing:-.01em} .detail .meta{color:var(--mut);font-size:12px;margin-bottom:16px}
+  .sec{margin:16px 0} .sec .lbl{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:6px}
+  .reason{font-size:13px;color:#374151;line-height:1.6;margin-top:6px}
+  .msg{background:#f9fafb;border:1px solid var(--bd);border-radius:10px;padding:14px 16px;font-size:13px;line-height:1.7;white-space:pre-wrap;color:#374151}
+  .kv{font-size:13px;line-height:1.9} .kv b{color:var(--ink)}
+  .empty{color:var(--faint);font-size:12px}
+  .joblink{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:600;transition:background .1s}
+  .joblink:hover{background:#4338ca}
   @media(max-width:820px){.layout{flex-direction:column}.detail{position:static}}
 </style></head><body><div class="wrap">
-  <h1>Korea Lead-Gen — Leads</h1>
-  <div class="sub" id="summary"></div>
+  <div class="head"><h1>Korea Lead-Gen — Leads</h1>
+    <div class="sub" id="summary"></div></div>
+  <div class="stats" id="stats"></div>
   <div class="tools">
     <input id="q" placeholder="Search company…" oninput="render()">
     <select id="svc" onchange="render()"><option value="">All services</option></select>
@@ -129,17 +137,26 @@ function filtered(){
     .sort((a,b)=>{const x=a[sortKey],y=b[sortKey];return (x>y?1:x<y?-1:0)*sortDir;});
 }
 
+function pill(v){ return '<span class="pill pill-'+v+'">'+(VICON[v]||'')+' '+(v||'-')+'</span>'; }
+
 function render(){
   const rows=filtered();
   document.getElementById("summary").textContent =
-    rows.length+" of "+DATA.length+" leads · ICP scoring + AI qualification + AI outreach draft";
+    "ICP-based scoring + AI qualification + AI outreach draft";
+  const fitN = DATA.filter(d=>d.verdict==="fit").length;
+  const avg = DATA.length ? Math.round(DATA.reduce((a,d)=>a+d.fit,0)/DATA.length) : 0;
+  document.getElementById("stats").innerHTML =
+    '<div class="stat"><div class="n">'+DATA.length+'</div><div class="l">Leads</div></div>'
+   +'<div class="stat"><div class="n">'+fitN+'</div><div class="l">AI-qualified fit</div></div>'
+   +'<div class="stat"><div class="n">'+avg+'</div><div class="l">Avg fit score</div></div>'
+   +'<div class="stat"><div class="n">'+rows.length+'</div><div class="l">Showing</div></div>';
   document.getElementById("rows").innerHTML = rows.map(d=>
     '<tr class="row '+(selected===d.company?'sel':'')+'" onclick="select(\\''+d.company.replace(/'/g,"\\\\'")+'\\')">'
-    +'<td class="score">'+Math.round(d.fit)+'</td><td>'+esc(d.company)+'</td>'
+    +'<td class="score">'+Math.round(d.fit)+'</td><td><b>'+esc(d.company)+'</b></td>'
     +'<td><span class="chip">'+(SVC[d.service]||d.service||'-')+'</span></td>'
     +'<td>'+(d.hiring||'-')+'</td>'
-    +'<td class="v-'+d.verdict+'">'+(VICON[d.verdict]||'')+' '+(d.verdict||'-')+'</td></tr>').join("")
-    || '<tr><td colspan=5 class="empty" style="padding:20px">No matches.</td></tr>';
+    +'<td>'+pill(d.verdict)+'</td></tr>').join("")
+    || '<tr><td colspan=5 class="empty" style="padding:24px;text-align:center">No matches.</td></tr>';
   if(rows.length && !rows.find(r=>r.company===selected)) select(rows[0].company); else drawDetail();
 }
 
@@ -162,8 +179,7 @@ function drawDetail(){
       +'<span class="score" style="font-size:22px">'+Math.round(d.fit)+'</span> / 100 '
       +'&nbsp;<span class="chip">'+(SVC[d.service]||d.service||'-')+'</span></div>'
     +'<div class="sec"><div class="lbl">🤖 AI qualification</div>'
-      +'<span class="badge v-'+d.verdict+'">'+(VICON[d.verdict]||'')+' '+(d.verdict||'-')+'</span> '
-      +'<span class="empty">('+(d.confidence||'-')+')</span>'
+      +pill(d.verdict)+' <span class="empty">('+(d.confidence||'-')+')</span>'
       +'<div class="reason">'+(esc(d.reason)||'<span class=empty>not qualified yet</span>')+'</div></div>'
     +'<div class="sec"><div class="lbl">Tech stack</div><div class="kv">'+(esc(d.tech)||'<span class=empty>—</span>')+'</div></div>'
     +'<div class="sec"><div class="lbl">Contact</div>'+contact+'</div>'

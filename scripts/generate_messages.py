@@ -31,6 +31,12 @@ SERVICE_VALUE = {
     "ai_implementation": "실용적인 AI 도구와 워크플로우를 만들어 드리는 AI 구축",
     "systems_integration": "ERP·클라우드 등 시스템을 구축·통합해 드리는 서비스",
 }
+SERVICE_VALUE_EN = {
+    "it_servicing": "outsourced software delivery handled by a vetted Filipino team",
+    "manpower": "placing vetted Filipino developers directly into your team",
+    "ai_implementation": "building practical AI tools and workflows for you",
+    "systems_integration": "building and integrating systems like ERP and cloud",
+}
 SERVICE_LABEL = {
     "it_servicing": "IT 서비싱", "manpower": "인력 배치",
     "ai_implementation": "AI 구축", "systems_integration": "시스템 통합",
@@ -54,10 +60,18 @@ def template_message(lead: dict) -> str:
     name = lead.get("company_name", "")
     titles = (lead.get("sample_titles", "") or "").split(";")
     role = titles[0] if titles and titles[0] else "개발"
-    hiring = lead.get("hiring_count", "")
     best = lead.get("best_service", "it_servicing")
     value = SERVICE_VALUE.get(best, SERVICE_VALUE["it_servicing"])
-    return (
+    value_en = SERVICE_VALUE_EN.get(best, SERVICE_VALUE_EN["it_servicing"])
+    english = (
+        f"Hello {name} team,\n\n"
+        f"I noticed {name} is hiring for roles like {role}, so you may be under "
+        f"pressure to scale your engineering capacity quickly.\n\n"
+        f"Springboard Philippines can help — {value_en}. It's faster and more "
+        f"cost-effective than hiring locally in Korea.\n\n"
+        f"Would you be open to a quick 15-minute call?"
+    )
+    korean = (
         f"안녕하세요, {name} 채용 담당자님.\n\n"
         f"{name}에서 '{role}' 등 개발 포지션을 채용 중이신 것을 보고 연락드립니다. "
         f"인력 충원이 빠르게 필요하신 상황일 것 같습니다.\n\n"
@@ -65,6 +79,7 @@ def template_message(lead: dict) -> str:
         f"채용하시는 것보다 빠르고 비용 효율적으로 팀을 확장하실 수 있습니다.\n\n"
         f"혹시 15분 정도 짧게 이야기 나눠볼 수 있을까요? 감사합니다."
     )
+    return f"[English]\n{english}\n\n──────────\n\n[한국어]\n{korean}"
 
 
 def claude_message(client, lead: dict) -> str:
@@ -80,9 +95,13 @@ def claude_message(client, lead: dict) -> str:
     system = (
         "You write B2B outbound for Springboard Philippines, which provides vetted "
         "Filipino IT talent and services to Korean companies. Write a short, warm, "
-        "professional first-touch cold email IN KOREAN (정중한 존댓말), 4-6 sentences. "
-        "Personalize to the company's hiring signal. Natural, not salesy. No subject "
-        "line. End with a soft ask for a 15-minute call."
+        "professional first-touch cold message, 4-6 sentences, personalized to the "
+        "company's hiring signal. Natural, not salesy, no subject line, ending with "
+        "a soft ask for a 15-minute call.\n\n"
+        "Output the ENGLISH version first (label it '[English]'), then a KOREAN "
+        "version in 정중한 존댓말 (label it '[한국어]'), separated by a line of "
+        "'──────────'. The English is for the internal team; the Korean is what "
+        "gets sent to the company."
     )
     resp = client.messages.create(
         model="claude-opus-4-8",
