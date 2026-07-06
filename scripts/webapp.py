@@ -103,7 +103,7 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
     <div class="sub" id="summary"></div></div>
   <div class="stats" id="stats"></div>
   <div class="tools">
-    <input id="q" placeholder="Search company…" oninput="render()">
+    <input id="q" placeholder="Search company, industry, tech… (typo-tolerant)" oninput="render()">
     <select id="svc" onchange="render()"><option value="">All services</option></select>
     <select id="vd" onchange="render()">
       <option value="">All verdicts</option><option value="fit">✅ fit</option>
@@ -130,10 +130,29 @@ const svc = document.getElementById("svc"), q = document.getElementById("q"), vd
 
 function sortBy(k){ sortDir = (sortKey===k)? -sortDir : (k==="fit"?-1:1); sortKey=k; render(); }
 
+// Levenshtein edit distance (for typo tolerance)
+function lev(a,b){
+  const m=a.length,n=b.length; if(!m)return n; if(!n)return m;
+  let prev=Array.from({length:n+1},(_,i)=>i);
+  for(let i=1;i<=m;i++){ const cur=[i];
+    for(let j=1;j<=n;j++){ cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1)); }
+    prev=cur; }
+  return prev[n];
+}
+// all searchable text for a company (name + industry + tech + service + region)
+function hay(d){ return (d.company+' '+(d.industry||'')+' '+(d.tech||'')+' '+(SVC[d.service]||d.service||'')+' '+d.service+' '+(d.region||'')).toLowerCase(); }
+// match: multi-field substring OR fuzzy (typo) against company-name words
+function matches(d,term){
+  if(!term) return true;
+  if(hay(d).includes(term)) return true;
+  const max = term.length<=4 ? 1 : 2;
+  if(lev(d.company.toLowerCase(), term) <= max) return true;
+  return d.company.toLowerCase().split(/[\\s·/]+/).some(w=> w && lev(w, term) <= max);
+}
+
 function filtered(){
-  const term=q.value.toLowerCase(), fs=svc.value, fv=vd.value;
-  return DATA.filter(d=>(!term||d.company.toLowerCase().includes(term))
-    &&(!fs||d.service===fs)&&(!fv||d.verdict===fv))
+  const term=q.value.toLowerCase().trim(), fs=svc.value, fv=vd.value;
+  return DATA.filter(d=> matches(d,term) && (!fs||d.service===fs) && (!fv||d.verdict===fv))
     .sort((a,b)=>{const x=a[sortKey],y=b[sortKey];return (x>y?1:x<y?-1:0)*sortDir;});
 }
 
