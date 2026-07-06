@@ -79,9 +79,9 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
   input{flex:1;min-width:200px}
   .layout{display:flex;gap:16px;align-items:flex-start}
   .card{background:#fff;border-radius:16px;box-shadow:0 1px 3px rgba(16,24,40,.06),0 1px 2px rgba(16,24,40,.04)}
-  .list{flex:1.1;overflow:hidden} .detail{flex:1;padding:22px 24px;position:sticky;top:32px}
+  .list{flex:1.1;max-height:78vh;overflow-y:auto} .detail{flex:1;padding:22px 24px;position:sticky;top:32px}
   table{width:100%;border-collapse:collapse;font-size:13px}
-  th{text-align:left;color:var(--faint);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:12px 16px;border-bottom:1px solid var(--bd);cursor:pointer;user-select:none}
+  th{text-align:left;color:var(--faint);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:12px 16px;border-bottom:1px solid var(--bd);cursor:pointer;user-select:none;position:sticky;top:0;background:#fff;z-index:1}
   td{padding:12px 16px;border-bottom:1px solid #f4f5f7;vertical-align:middle}
   tr:last-child td{border-bottom:none}
   tr.row{cursor:pointer;transition:background .1s} tr.row:hover{background:#fafbfc} tr.sel{background:#f5f3ff;box-shadow:inset 3px 0 0 var(--accent)}
