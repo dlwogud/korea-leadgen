@@ -44,6 +44,7 @@ def build_dataset() -> list[dict]:
             "industry": d.get("industry", "") or s.get("industry", ""),
             "tech": (d.get("tech_stack", "") or "").replace(";", ", "),
             "region": d.get("locations", ""),
+            "roles": (d.get("sample_titles", "") or s.get("sample_titles", "") or "").replace(";", ", "),
             "url": d.get("source_url", "") or s.get("source_url", ""),
             "contact_name": fn.get("contact_name", "") or c.get("full_name", ""),
             "contact_title": fn.get("contact_title", "") or c.get("title", ""),
@@ -139,8 +140,18 @@ function lev(a,b){
     prev=cur; }
   return prev[n];
 }
-// all searchable text for a company (name + industry + tech + service + region)
-function hay(d){ return (d.company+' '+(d.industry||'')+' '+(d.tech||'')+' '+(SVC[d.service]||d.service||'')+' '+d.service+' '+(d.region||'')).toLowerCase(); }
+// Korean role/tech term -> English alias, so English searches hit Korean data
+const ALIAS = {"데이터 엔지니어":"data engineer","데이터엔지니어":"data engineer",
+  "백엔드":"backend","프론트엔드":"frontend","서버 개발":"server developer","서버":"server",
+  "데브옵스":"devops","기술지원":"technical support","고객지원":"customer support cs","운영":"operations ops",
+  "머신러닝":"machine learning ml","테스트":"qa test","개발자":"developer","시스템 엔지니어":"system engineer",
+  "핀테크":"fintech","이커머스":"ecommerce","게임":"gaming game","보안":"security","물류":"logistics","제조":"manufacturing"};
+// all searchable text: name + industry + tech + service + region + job roles (+ English aliases)
+function hay(d){
+  let t = (d.company+' '+(d.industry||'')+' '+(d.tech||'')+' '+(SVC[d.service]||d.service||'')+' '+d.service+' '+(d.region||'')+' '+(d.roles||'')).toLowerCase();
+  for(const k in ALIAS){ if(t.indexOf(k.toLowerCase())>=0) t += ' '+ALIAS[k]; }
+  return t;
+}
 // fuzzy substring: slide a window over the text and compare each to the term
 function fuzzyHas(text,term){
   if(text.includes(term)) return true;
