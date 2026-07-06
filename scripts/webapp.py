@@ -44,6 +44,7 @@ def build_dataset() -> list[dict]:
             "industry": d.get("industry", "") or s.get("industry", ""),
             "tech": (d.get("tech_stack", "") or "").replace(";", ", "),
             "region": d.get("locations", ""),
+            "url": d.get("source_url", "") or s.get("source_url", ""),
             "contact_name": fn.get("contact_name", "") or c.get("full_name", ""),
             "contact_title": fn.get("contact_title", "") or c.get("title", ""),
             "email": fn.get("email", "") or c.get("email", ""),
@@ -87,6 +88,8 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
   .msg{background:#f8fafc;border:1px solid var(--bd);border-radius:8px;padding:14px;font-size:13px;line-height:1.7;white-space:pre-wrap}
   .kv{font-size:13px;line-height:1.8} .kv b{color:#374151}
   .empty{color:#9aa1ad;font-size:12px}
+  .joblink{display:inline-block;background:#2563eb;color:#fff;text-decoration:none;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600}
+  .joblink:hover{background:#1d4ed8}
   @media(max-width:820px){.layout{flex-direction:column}.detail{position:static}}
 </style></head><body><div class="wrap">
   <h1>Korea Lead-Gen — Leads</h1>
@@ -150,9 +153,11 @@ function drawDetail(){
     ? '<div class="kv"><b>'+esc(d.contact_name)+'</b> '+esc(d.contact_title)+'<br>'
       +(d.email?esc(d.email)+"<br>":"")+(d.linkedin?esc(d.linkedin):"")+'</div>'
     : '<div class="empty">No decision-maker contact yet.</div>';
+  const link = d.url ? '<a class="joblink" href="'+esc(d.url)+'" target="_blank" rel="noopener">🔗 View job posting →</a>' : '';
   el.innerHTML =
     '<h2>'+esc(d.company)+'</h2>'
     +'<div class="meta">'+esc(d.industry)+' · '+esc(d.region)+' · '+(d.hiring||0)+' openings</div>'
+    +(link?'<div class="sec">'+link+'</div>':'')
     +'<div class="sec"><div class="lbl">Fit score</div>'
       +'<span class="score" style="font-size:22px">'+Math.round(d.fit)+'</span> / 100 '
       +'&nbsp;<span class="chip">'+(SVC[d.service]||d.service||'-')+'</span></div>'

@@ -17,7 +17,7 @@ OUT = DATA_DIR / "delivery.csv"
 # Columns the outreach team works with
 FIELDS = [
     "company_name", "best_service", "fit_score", "hiring_count", "industry",
-    "tech_stack", "contact_name", "contact_title", "email", "linkedin_url",
+    "tech_stack", "contact_name", "contact_title", "email", "linkedin_url", "job_posting_url",
     "outreach_message",           # Claude's draft
     "status", "notes",            # blank — for the team to fill
 ]
@@ -52,6 +52,7 @@ def main() -> None:
             "contact_title": lead.get("contact_title", "") or c.get("title", ""),
             "email": lead.get("email", "") or c.get("email", ""),
             "linkedin_url": lead.get("linkedin_url", "") or c.get("linkedin_url", ""),
+            "job_posting_url": lead.get("source_url", "") or d.get("source_url", ""),
             "outreach_message": drafts.get(name, ""),   # blank if no draft yet
             "status": "",
             "notes": "",
