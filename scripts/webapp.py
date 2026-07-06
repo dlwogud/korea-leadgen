@@ -141,13 +141,23 @@ function lev(a,b){
 }
 // all searchable text for a company (name + industry + tech + service + region)
 function hay(d){ return (d.company+' '+(d.industry||'')+' '+(d.tech||'')+' '+(SVC[d.service]||d.service||'')+' '+d.service+' '+(d.region||'')).toLowerCase(); }
-// match: multi-field substring OR fuzzy (typo) against company-name words
+// fuzzy substring: slide a window over the text and compare each to the term
+function fuzzyHas(text,term){
+  if(text.includes(term)) return true;
+  const L=term.length, max = L<=2?0 : (L<=5?1:2);
+  if(max===0) return false;
+  for(let i=0;i<=text.length-1;i++){
+    for(let w=Math.max(1,L-max); w<=L+max; w++){
+      if(i+w>text.length) continue;
+      if(lev(text.substr(i,w),term)<=max) return true;
+    }
+  }
+  return false;
+}
+// match: exact across all fields, OR typo-tolerant on the company name
 function matches(d,term){
   if(!term) return true;
-  if(hay(d).includes(term)) return true;
-  const max = term.length<=4 ? 1 : 2;
-  if(lev(d.company.toLowerCase(), term) <= max) return true;
-  return d.company.toLowerCase().split(/[\\s·/]+/).some(w=> w && lev(w, term) <= max);
+  return hay(d).includes(term) || fuzzyHas(d.company.toLowerCase(), term);
 }
 
 function filtered(){
