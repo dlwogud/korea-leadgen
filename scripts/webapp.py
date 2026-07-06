@@ -1,0 +1,178 @@
+"""Interactive single-file lead explorer → data/leads.html
+
+Merges every per-company output (score, AI qualification, AI outreach draft,
+contact) into one embedded dataset, and renders a standalone interactive page:
+click a company to see all its details, plus search / service filter / verdict
+filter / sort. No server, no dependencies — inline JS + data, so it's still a
+shareable single file that opens in any browser.
+
+    python scripts/webapp.py   →   data/leads.html
+"""
+from __future__ import annotations
+
+import csv
+import json
+
+from _common import DATA_DIR
+
+OUT = DATA_DIR / "leads.html"
+
+
+def _read(name):
+    p = DATA_DIR / name
+    return list(csv.DictReader(p.open(encoding="utf-8"))) if p.exists() else []
+
+
+def build_dataset() -> list[dict]:
+    db = {r["company_name"]: r for r in _read("companies_db.csv")}
+    scores = {r["company_name"]: r for r in _read("scored_leads.csv")}
+    final = {r["company_name"]: r for r in _read("final_leads.csv")}
+    quals = {r["company_name"]: r for r in _read("qualified_leads.csv")}
+    drafts = {r["company_name"]: r.get("message", "") for r in _read("outreach_drafts.csv")}
+    contacts = {r["company_name"]: r for r in _read("contacts_worksheet.csv")}
+
+    names = list(db) or list(scores)
+    rows = []
+    for name in names:
+        d, s = db.get(name, {}), scores.get(name, {})
+        fn, q, c = final.get(name, {}), quals.get(name, {}), contacts.get(name, {})
+        rows.append({
+            "company": name,
+            "service": d.get("best_service", "") or fn.get("best_service", ""),
+            "fit": float(fn.get("fit_score") or s.get("fit_score") or 0),
+            "hiring": d.get("hiring_count", "") or s.get("hiring_count", ""),
+            "industry": d.get("industry", "") or s.get("industry", ""),
+            "tech": (d.get("tech_stack", "") or "").replace(";", ", "),
+            "region": d.get("locations", ""),
+            "contact_name": fn.get("contact_name", "") or c.get("full_name", ""),
+            "contact_title": fn.get("contact_title", "") or c.get("title", ""),
+            "email": fn.get("email", "") or c.get("email", ""),
+            "linkedin": fn.get("linkedin_url", "") or c.get("linkedin_url", ""),
+            "verdict": q.get("verdict", ""),
+            "confidence": q.get("confidence", ""),
+            "reason": q.get("reason", ""),
+            "message": drafts.get(name, ""),
+        })
+    rows.sort(key=lambda r: r["fit"], reverse=True)
+    return rows
+
+
+HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Korea Lead-Gen — Leads</title><style>
+  :root{{--bd:#eef1f5;--mut:#6b7280;--blue:#2563eb}}
+  *{{box-sizing:border-box}}
+  body{{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#f6f7f9;color:#1f2430;margin:0;padding:24px}}
+  .wrap{{max-width:1100px;margin:0 auto}}
+  h1{{font-size:20px;margin:0 0 2px}} .sub{{color:var(--mut);font-size:13px;margin-bottom:16px}}
+  .tools{{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}}
+  input,select{{padding:8px 10px;border:1px solid var(--bd);border-radius:8px;font-size:13px;background:#fff}}
+  input{{flex:1;min-width:180px}}
+  .layout{{display:flex;gap:16px;align-items:flex-start}}
+  .card{{background:#fff;border-radius:12px;box-shadow:0 2px 14px rgba(0,0,0,.06)}}
+  .list{{flex:1;overflow:hidden}} .detail{{flex:1;padding:20px 22px;position:sticky;top:24px}}
+  table{{width:100%;border-collapse:collapse;font-size:13px}}
+  th{{text-align:left;color:#9aa1ad;font-weight:600;padding:10px 12px;border-bottom:1px solid var(--bd);cursor:pointer;user-select:none}}
+  td{{padding:9px 12px;border-bottom:1px solid #f3f4f6}}
+  tr.row{{cursor:pointer}} tr.row:hover{{background:#f8fafc}} tr.sel{{background:#eff6ff}}
+  .score{{font-weight:700;color:var(--blue)}}
+  .chip{{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:20px;padding:2px 9px;font-size:11px}}
+  .v-fit{{color:#059669}} .v-maybe{{color:#b45309}} .v-not_fit{{color:#dc2626}}
+  .detail h2{{font-size:16px;margin:0 0 2px}} .detail .meta{{color:var(--mut);font-size:12px;margin-bottom:14px}}
+  .sec{{margin:14px 0}} .sec .lbl{{font-size:11px;color:#9aa1ad;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}}
+  .badge{{font-weight:700;font-size:14px}} .reason{{font-size:13px;color:#374151;line-height:1.6;margin-top:4px}}
+  .msg{{background:#f8fafc;border:1px solid var(--bd);border-radius:8px;padding:14px;font-size:13px;line-height:1.7;white-space:pre-wrap}}
+  .kv{{font-size:13px;line-height:1.8}} .kv b{{color:#374151}}
+  .empty{{color:#9aa1ad;font-size:12px}}
+  @media(max-width:820px){{.layout{{flex-direction:column}}.detail{{position:static}}}}
+</style></head><body><div class="wrap">
+  <h1>Korea Lead-Gen — Leads</h1>
+  <div class="sub" id="summary"></div>
+  <div class="tools">
+    <input id="q" placeholder="Search company…" oninput="render()">
+    <select id="svc" onchange="render()"><option value="">All services</option></select>
+    <select id="vd" onchange="render()">
+      <option value="">All verdicts</option><option value="fit">✅ fit</option>
+      <option value="maybe">🟡 maybe</option><option value="not_fit">❌ not_fit</option></select>
+  </div>
+  <div class="layout">
+    <div class="card list"><table>
+      <thead><tr><th onclick="sortBy('fit')">Fit ▾</th><th onclick="sortBy('company')">Company</th>
+      <th>Service</th><th>Hires</th><th>Verdict</th></tr></thead>
+      <tbody id="rows"></tbody></table></div>
+    <div class="card detail" id="detail"></div>
+  </div>
+</div>
+<script>
+const DATA = __DATA__;
+const SVC = {{it_servicing:"IT Servicing", manpower:"Manpower", ai_implementation:"AI Implementation", systems_integration:"Systems Integration"}};
+const VICON = {{fit:"✅", maybe:"🟡", not_fit:"❌"}};
+let sortKey="fit", sortDir=-1, selected=null;
+const esc = s => (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
+
+// populate service filter
+[...new Set(DATA.map(d=>d.service).filter(Boolean))].forEach(s=>{{
+  const o=document.createElement("option");o.value=s;o.textContent=SVC[s]||s;svc.appendChild(o);}});
+
+function sortBy(k){{ sortDir = (sortKey===k)? -sortDir : (k==="fit"?-1:1); sortKey=k; render(); }}
+
+function filtered(){{
+  const term=q.value.toLowerCase(), fs=svc.value, fv=vd.value;
+  return DATA.filter(d=>(!term||d.company.toLowerCase().includes(term))
+    &&(!fs||d.service===fs)&&(!fv||d.verdict===fv))
+    .sort((a,b)=>{{const x=a[sortKey],y=b[sortKey];return (x>y?1:x<y?-1:0)*sortDir;}});
+}}
+
+function render(){{
+  const rows=filtered();
+  document.getElementById("summary").textContent =
+    `${{rows.length}} of ${{DATA.length}} leads · ICP-based scoring + AI qualification + AI outreach draft`;
+  document.getElementById("rows").innerHTML = rows.map(d=>`
+    <tr class="row ${{selected===d.company?'sel':''}}" onclick="select('${{d.company.replace(/'/g,"\\\\'")}}')">
+      <td class="score">${{Math.round(d.fit)}}</td><td>${{esc(d.company)}}</td>
+      <td><span class="chip">${{SVC[d.service]||d.service||'-'}}</span></td>
+      <td>${{d.hiring||'-'}}</td>
+      <td class="v-${{d.verdict}}">${{VICON[d.verdict]||''}} ${{d.verdict||'-'}}</td></tr>`).join("")
+    || `<tr><td colspan=5 class="empty" style="padding:20px">No matches.</td></tr>`;
+  if(rows.length && !rows.find(r=>r.company===selected)) select(rows[0].company); else drawDetail();
+}}
+
+function select(name){{ selected=name; render(); }}
+
+function drawDetail(){{
+  const d = DATA.find(x=>x.company===selected);
+  const el=document.getElementById("detail");
+  if(!d){{ el.innerHTML=`<div class="empty">Select a lead.</div>`; return; }}
+  const contact = d.contact_name ? `<div class="kv"><b>${{esc(d.contact_name)}}</b> ${{esc(d.contact_title)}}<br>
+    ${{d.email?esc(d.email)+"<br>":""}}${{d.linkedin?esc(d.linkedin):""}}</div>`
+    : `<div class="empty">No decision-maker contact yet.</div>`;
+  el.innerHTML = `
+    <h2>${{esc(d.company)}}</h2>
+    <div class="meta">${{esc(d.industry)}} · ${{esc(d.region)}} · ${{d.hiring||0}} openings</div>
+    <div class="sec"><div class="lbl">Fit score</div>
+      <span class="score" style="font-size:22px">${{Math.round(d.fit)}}</span> / 100
+      &nbsp;<span class="chip">${{SVC[d.service]||d.service||'-'}}</span></div>
+    <div class="sec"><div class="lbl">🤖 AI qualification</div>
+      <span class="badge v-${{d.verdict}}">${{VICON[d.verdict]||''}} ${{d.verdict||'-'}}</span>
+      <span class="empty">(${{d.confidence||'-'}})</span>
+      <div class="reason">${{esc(d.reason)||'<span class=empty>not qualified yet</span>'}}</div></div>
+    <div class="sec"><div class="lbl">Tech stack</div><div class="kv">${{esc(d.tech)||'<span class=empty>—</span>'}}</div></div>
+    <div class="sec"><div class="lbl">Contact</div>${{contact}}</div>
+    <div class="sec"><div class="lbl">✉️ AI outreach draft</div>
+      ${{d.message?`<div class="msg">${{esc(d.message)}}</div>`:'<div class="empty">no draft yet — run generate_messages.py</div>'}}</div>`;
+}}
+render();
+</script></body></html>"""
+
+
+def main() -> None:
+    data = build_dataset()
+    payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+    DATA_DIR.mkdir(exist_ok=True)
+    OUT.write_text(HTML.replace("__DATA__", payload), encoding="utf-8")
+    print(f"Wrote {OUT.relative_to(DATA_DIR.parent)} — {len(data)} leads. "
+          f"Open it / share it (single file, click a company for details).")
+
+
+if __name__ == "__main__":
+    main()

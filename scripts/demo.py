@@ -99,6 +99,7 @@ def main() -> None:
     seed_pipeline_events()
     run("dashboard.py")
     run("overview.py")
+    run("webapp.py")
     run("export_delivery.py")
     run("build_db.py")
     print(f"\n{'#'*64}")
