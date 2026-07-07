@@ -26,6 +26,7 @@ COLUMN_ALIASES = {
     "industry":     ["industry", "업종", "산업", "산업군", "분야"],
     "locations":    ["locations", "location", "지역", "region", "소재지"],
     "hiring_count": ["hiring_count", "채용수", "채용", "공고수", "오픈포지션"],
+    "employees":    ["employees", "직원수", "규모", "headcount", "size", "인원"],
     "sample_titles": ["sample_titles", "titles", "직무", "포지션", "채용직무"],
     "source_url":   ["source_url", "url", "홈페이지", "링크", "website"],
 }
@@ -66,6 +67,7 @@ def main() -> None:
                 "industry": src.get(colmap.get("industry", ""), "") or "",
                 "locations": src.get(colmap.get("locations", ""), "") or "",
                 "hiring_count": src.get(colmap.get("hiring_count", ""), "") or "",
+                "employees": src.get(colmap.get("employees", ""), "") or "",
                 "sample_titles": src.get(colmap.get("sample_titles", ""), "") or "",
                 "source": "business_list",
                 "source_url": src.get(colmap.get("source_url", ""), "") or "",

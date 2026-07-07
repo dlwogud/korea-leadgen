@@ -22,7 +22,7 @@ from _common import DATA_DIR, RAW_CSV, read_companies
 DB_CSV = DATA_DIR / "companies_db.csv"
 
 DB_FIELDS = [
-    "company_name", "industry", "locations", "hiring_count", "sample_titles",
+    "company_name", "industry", "locations", "hiring_count", "employees", "sample_titles",
     "tech_stack",
     "fit_it_servicing", "fit_manpower", "fit_ai_implementation", "fit_systems_integration",
     "best_service",
@@ -74,6 +74,7 @@ def main() -> None:
             "industry": row.get("industry", ""),
             "locations": row.get("locations", ""),
             "hiring_count": row.get("hiring_count", ""),   # latest value (not summed)
+            "employees": row.get("employees", ""),
             "sample_titles": row.get("sample_titles", ""),
             "tech_stack": tech,
             **fits,

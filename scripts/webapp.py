@@ -55,7 +55,9 @@ def build_dataset() -> list[dict]:
             "reason": q.get("reason", ""),
             "message": drafts.get(name, ""),
         })
-    rows.sort(key=lambda r: r["fit"], reverse=True)
+    # rank by fit score, then verdict (fit > maybe > not_fit) as the tie-breaker
+    _vrank = {"fit": 3, "maybe": 2, "not_fit": 1}
+    rows.sort(key=lambda r: (r["fit"], _vrank.get(r["verdict"], 0)), reverse=True)
     return rows
 
 
@@ -174,7 +176,7 @@ function matches(d,term){
 function filtered(){
   const term=q.value.toLowerCase().trim(), fs=svc.value, fv=vd.value;
   return DATA.filter(d=> matches(d,term) && (!fs||d.service===fs) && (!fv||d.verdict===fv))
-    .sort((a,b)=>{const x=a[sortKey],y=b[sortKey];return (x>y?1:x<y?-1:0)*sortDir;});
+    .sort((a,b)=>{const x=a[sortKey],y=b[sortKey]; if(x!==y) return (x>y?1:-1)*sortDir; const VR={fit:3,maybe:2,not_fit:1}; return (VR[b.verdict]||0)-(VR[a.verdict]||0);});
 }
 
 function pill(v){ return '<span class="pill pill-'+v+'">'+(VICON[v]||'')+' '+(v||'-')+'</span>'; }

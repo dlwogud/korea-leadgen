@@ -22,6 +22,7 @@ COMPANY_FIELDS = [
     "industry",       # 업종 (best-effort from the source)
     "locations",      # ';'-joined regions seen across postings
     "hiring_count",   # number of open IT/dev postings found = hiring-signal strength
+    "employees",      # approx. headcount (firmographic ICP check: 20-300); '' if unknown
     "sample_titles",  # ';'-joined example job titles (evidence)
     "source",         # which data source produced this row ('saramin', ...)
     "source_url",     # one representative link

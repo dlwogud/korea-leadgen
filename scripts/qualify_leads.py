@@ -35,9 +35,18 @@ ICP_TEXT = """Ideal Customer Profile (confirmed by the team):
 SYSTEM = (
     "You qualify B2B leads for Springboard Philippines, which supplies vetted "
     "Filipino IT talent and services to Korean companies. Given one company, "
-    "judge how well it fits the Ideal Customer Profile below. Be strict — only "
-    "'fit' when it genuinely matches. Give the reason in English, one or two "
-    "sentences.\n\n" + ICP_TEXT
+    "judge how well it fits the Ideal Customer Profile below. Give the reason in "
+    "English, one or two sentences.\n\n" + ICP_TEXT + "\n\n"
+    "Apply this STRICT verdict rubric (default to the lower verdict when unsure):\n"
+    "- 'fit' ONLY IF ALL THREE hold: (1) clearly a tech-enabled industry "
+    "(SaaS / fintech / gaming / e-commerce / IT-services); (2) size CONFIRMED "
+    "within 20-300 employees (unknown size => NOT fit); (3) a STRONG hiring-"
+    "pressure signal = at least TWO open MID-LEVEL developer/QA/DevOps/CX roles. "
+    "Senior-only roles, a single opening, or unconfirmed size can NEVER be 'fit'.\n"
+    "- 'maybe' if tech-enabled and plausibly in range, but the signal is weak "
+    "(only 1 role), roles are senior-only, or size is unconfirmed.\n"
+    "- 'not_fit' if non-tech industry, clearly outside 20-300, or no dev-hiring signal.\n"
+    "Reserve 'high' confidence for cases that plainly satisfy or plainly fail the rubric."
 )
 
 SCHEMA = {
@@ -63,7 +72,9 @@ def _facts(company: dict) -> str:
         f"Number of IT openings: {company.get('hiring_count','')}\n"
         f"Tech stack: {company.get('tech_stack','')}\n"
         f"Region: {company.get('locations','')}\n"
-        f"(size unknown from job data)"
+        + (f"Approx. employees: {company.get('employees')}"
+           if (company.get('employees') or "").strip()
+           else "(size unknown from job data)")
     )
 
 
