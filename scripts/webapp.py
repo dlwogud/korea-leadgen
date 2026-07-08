@@ -65,6 +65,7 @@ def build_dataset() -> list[dict]:
 # so all CSS/JS braces are single.
 HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
 <title>Korea Lead-Gen — Leads</title><style>
   :root{--bd:#edeff3;--mut:#6b7280;--faint:#9ca3af;--ink:#111827;--accent:#4f46e5}
   *{box-sizing:border-box}
