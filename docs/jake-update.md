@@ -29,7 +29,7 @@ Contact/evidence columns are wired and ready for the contact data to plug in.
 - **Real Claude AI** (`claude-opus-4-8`): qualifies each lead fit/maybe/not_fit **with reasoning**, and writes an **English + Korean** outreach draft.
 - **Strict, defensible qualification**: 'fit' requires tech industry + confirmed 20–300 size + 2+ mid-level dev roles → on the current demo set, 3 fit / rest maybe (it discriminates, doesn't rubber-stamp).
 - **Search** (KR↔EN) across pipeline and drafts; **fit-first ranking**.
-- **API-ready**: drop a data key in `.env` → the whole pipeline runs automatically; `daily.sh` schedules it.
+- **API-ready**: drop a data key in `.env` → the whole pipeline runs automatically; `daily_wanted.sh` schedules it.
 - Live demo on **27 real Korean companies** (sourced from live listings).
 
 ## 3. Structural finding — data sourcing for a PH company ⚠️

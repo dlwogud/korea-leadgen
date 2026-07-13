@@ -1,12 +1,14 @@
-"""Live pipeline — real Saramin data → scored + qualified leads + delivery sheet.
+"""Live pipeline — the SARAMIN (licensed) path.
 
-Once SARAMIN_API_KEY is in .env, this runs the whole thing on real Korean job
-postings (no sample data):
+The DEFAULT source is Wanted — use scripts/daily_wanted.sh (see docs/AUTOMATION.md).
+This script is the equivalent for teams that have LICENSED the Saramin API: same
+enrich → score → AI qualify/draft → delivery outputs, just sourced from Saramin.
+
+Once SARAMIN_API_KEY is in .env, it runs the whole thing on real Saramin postings:
   source (Saramin) → enrich → score → contact worksheet → AI qualify + draft
   → delivery sheet → interactive app → DB
 
 Set ANTHROPIC_API_KEY too for the AI steps (qualify + outreach drafts).
-For daily automation, schedule scripts/daily.sh with cron (see docs/AUTOMATION.md).
 
     # first live run — confirm Saramin's field mapping, and start clean:
     python scripts/source_saramin.py --debug          # verify response once

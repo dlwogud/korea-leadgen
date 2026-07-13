@@ -41,7 +41,7 @@ opens this and knows who to contact and what to say."
 
 - ICP-driven (size 20-300, tech industries, dev-hiring signal) — all configurable.
 - Outputs a `delivery.csv` the team pastes into the shared Google Sheet.
-- Runs end-to-end automatically; `daily.sh` can schedule it every morning.
+- Runs end-to-end automatically; `daily_wanted.sh` can schedule it every morning.
 
 ---
 
