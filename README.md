@@ -1,105 +1,72 @@
-# Korea Lead-Gen — Data Backbone 
+# Korea Market Activation Platform
 
-Data foundation for the Springboard × SyncTalents Korea market-entry internship
-(2026-06-29 → 2026-07-17). Owns the **prospect database, lead scoring, and
-pipeline/funnel dashboard** that the Business and AI tracks build on top of.
-
-## Why this exists
-
-Every outreach decision in the program should be data-driven:
-- **Business track** works the highest-scored leads first.
-- **AI track** writes sourced prospects into this schema.
-- **Capstone** is judged partly on cross-track synergy — a shared data backbone
-  is the cleanest way to make that synergy real instead of three silos.
-
-## Target service areas (priority for this cohort)
-
-1. **IT Tech Servicing** (staff augmentation / outsourced dev, QA, sysadmin) — primary.
-   Springboard's core strength; clearest cold-outreach value prop for Korea
-   (high local dev cost + talent shortage).
-2. **AI Implementation** — secondary, high-interest door-opener. The team's own
-   AI tooling doubles as proof-of-concept.
-3. Systems Integration / Skilled Manpower Placement — longer cycle, kept in schema
-   but not the initial outreach focus.
-
-The schema supports all four; the *focus* is a strategy choice we can re-tune.
-
-## The 8-stage funnel (program-wide shared language, playbook §6.1)
-
-1. Target identified → 2. Contact identified → 3. Outreach sent → 4. Reply received
-→ 5. Validation call booked → 6. Validation call held → 7. Concrete interest
-(proposal/demo/pricing requested) → 8. Korea-visit ready.
-
-`pipeline_events` tracks every lead's movement through these stages so the
-dashboard can show stage-by-stage conversion (the Week-4 deliverable).
-
-## Layout
+AI-powered lead generation for the **Springboard × SyncTalents** Korea
+market-entry internship. It sources Korean companies that are actively hiring
+developers, scores them against an Ideal Customer Profile (ICP), uses Claude to
+qualify and draft outreach, and presents everything in one shareable app.
 
 ```
-korea-leadgen/
-├── db/
-│   └── schema.sql        # prospect DB: companies, signals, contacts, scores, funnel
-├── docs/
-│   ├── ICP.md            # ideal-customer-profile hypotheses per service area
-│   └── lead-scoring.md   # how a company gets its 0–100 lead score
-└── scripts/              # (later) ingestion + scoring + dashboard refresh
+Wanted postings → enrich → ICP score → Claude qualify (fit/maybe/no) → EN/KR outreach → platform + delivery sheet
 ```
 
-## Quickstart
+**Live demo:** https://dlwogud.github.io/km-platform-demo/
+
+## The platform (5 views)
+
+`scripts/platform.py` builds a single self-contained app (`data/platform.html`):
+
+- **Overview** — KPIs, top leads, service/priority mix, funnel
+- **Pipeline (CRM)** — searchable leads: priority, AI verdict, evidence, detail
+- **KPI Funnel** — the playbook's 8-stage funnel (real events only)
+- **Outreach Studio** — Claude EN/KR drafts, searchable
+- **Recommendation (DSS)** — data-driven Go / Pilot / No-Go
+
+## Quick start
 
 ```bash
-cd korea-leadgen
-pip install -r requirements.txt
-cp .env.example .env          # then paste your free Saramin key into .env
+pip3 install -r requirements.txt
+cp .env.example .env          # add ANTHROPIC_API_KEY (for the AI steps)
 
-python scripts/run.py         # source from Saramin → score → ranked CSV
-# or step by step:
-python scripts/source_saramin.py --keywords "백엔드,데이터 엔지니어" --pages 2
-python scripts/score_leads.py
+# run the whole pipeline on fresh Wanted data:
+bash scripts/daily_wanted.sh
+# then open data/platform.html
 ```
 
-Outputs (gitignored, under `data/`):
-- `companies_raw.csv` — companies + hiring signals from Saramin
-- `scored_leads.csv` — same, ranked by IT-Servicing fit score
+## Data source
 
-> The scoring step runs on its own against any `companies_raw.csv`, so the
-> pipeline is demoable without a key (seed a sample CSV).
+- **Primary: Wanted** (`source_wanted.py`) — where Korean tech SMEs hiring
+  developers post. No API key needed. Best fit for the ICP. *Whether to run
+  automated collection is a company decision — see the script header.*
+- **Optional: Saramin** (`source_saramin.py` + `run_live.py`) — for teams that
+  license the Saramin API. Same pipeline, different source.
+- **Manual** (`import_list.py`) — import any company CSV. Fully legal fallback.
 
-## Two data sources (swappable)
+The source layer is swappable — every source writes the same schema
+(`scripts/_common.py`), so scoring + AI are identical whichever feed is used.
 
-Both emit the same company schema (`_common.COMPANY_FIELDS`), so scoring /
-contacts / dashboard are identical regardless of source:
+## Automation
 
-| Source | Script | Commercial use | When |
-|--------|--------|----------------|------|
-| **Saramin** (free API) | `source_saramin.py` | ❌ prototype only (≤500 calls/day, no resale) | now — best tech-company coverage for the POC |
-| **WorkNet** (public data) | `source_worknet.py` | ✅ public data permits commercial use | if/when this goes commercial |
+`scripts/daily_wanted.sh` runs the full pipeline; schedule it with cron
+(12:00 daily). See `docs/AUTOMATION.md`.
 
-**Plan:** validate with Saramin (prototype), swap to WorkNet if the program
-decides on commercial deployment. The WorkNet client is written but its API
-field mappings are marked `# VERIFY` until run against a live key.
+## Repository layout
 
-> Commercial deployment is a **company decision** (licensing + outreach
-> compliance), not something to run on a personal free key. See `docs/GAPS.md`.
+```
+config/icp.json   The ICP (size, industries, roles, weights) — edit to retarget
+scripts/          Pipeline: source_* / enrich / score / qualify / generate / platform / ...
+data/             Generated outputs (gitignored)
+docs/             Handover, reports, automation, ICP notes
+```
+
+## Key docs
+
+- **`docs/HANDOVER.md`** — how the company takes this over (repo, keys, run, schedule)
+- **`docs/jake-update.md`** — progress report + open decisions
+- **`docs/AUTOMATION.md`** — scheduling
+- **`docs/ICP.md`** — the target profile
 
 ## Status
 
-- [x] DB schema v1
-- [x] ICP hypotheses v1 (to validate against Week-2 real responses)
-- [x] Lead-scoring design v1
-- [x] Saramin sourcing script (`source_saramin.py`)
-- [x] Scoring script (`score_leads.py`) — verified on sample data
-- [x] Contact enrichment workflow (`make_contact_worksheet.py` → fill → `rescore_with_contacts.py`)
-- [x] Funnel logging + dashboard (`log_event.py`, `dashboard.py` → terminal + HTML)
-- [x] Living DB: tech-stack signal + per-service fit (all 4) + first/last_seen (`enrich.py`)
-- [x] Real SQLite database + SQL queries (`build_db.py`, `query_db.py`, `db/schema_sqlite.sql`)
-- [x] AI-track: personalized outreach draft per lead (`generate_messages.py` — template now, Claude when `ANTHROPIC_API_KEY` set)
-- [x] One-command demo on sample data (`demo.py`)
-- [ ] Add free Saramin key and run on real postings
-- [ ] Firmographic enrichment via DART (company size — still a placeholder)
-- [ ] Weekly response/conversion analysis (DS §5.2 #4 — needs Week-2 reply data)
-- [ ] Optional: auto reply-tracking if outreach goes via email (Gmail API)
-
-> Draft v1 — built day 1 to bring to the mentor / Friday sync as a concrete
-> proposal, not a finished system. Everything here is meant to be tuned with
-> real outreach data from Week 2 onward.
+Consolidated platform running on real Wanted data (prototype-grade). API-ready;
+productionizing needs a licensed data path + company Anthropic key. Honest
+limitations and open decisions are in `docs/jake-update.md`.
