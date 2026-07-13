@@ -5,23 +5,23 @@ decisions we still need from you (resolved items dropped)._
 
 ---
 
-## 1. Headline: the team's tools are now ONE platform
+## 1. Headline: one consolidated platform
 
-The team had built separate versions in parallel. We consolidated them into a
-single **Korea Market Activation Platform** — one navigable app that combines
-each person's strongest part:
+Working from what we each built, the team combined the **strongest parts of our
+work** into a single **Korea Market Activation Platform** — one navigable app
+covering the full BD flow. (It brings together the best features and structure
+we developed; the remaining data layers, e.g. contact enrichment, plug in next.)
 
-| View | What it does | Merged from |
-|------|--------------|-------------|
-| **Overview** | KPIs, top leads, service/priority mix, funnel at a glance | platform structure + live data |
-| **Pipeline (CRM)** | Searchable lead table: priority (High/Med/Low), AI verdict, evidence, detail panel | core engine + status/priority |
-| **KPI Funnel** | The playbook's 8-stage funnel (real events only — honesty principle) | funnel design |
-| **Outreach Studio** | Claude EN/KR drafts, searchable | AI engine |
-| **Recommendation (DSS)** | Go / Pilot / No-Go, data-driven | decision-support view |
+| View | What it does |
+|------|--------------|
+| **Overview** | KPIs, top leads, service/priority mix, funnel at a glance |
+| **Pipeline (CRM)** | Searchable lead table: priority (High/Med/Low), AI verdict, evidence, detail |
+| **KPI Funnel** | The playbook's 8-stage funnel (real events only — honesty principle) |
+| **Outreach Studio** | Claude EN/KR drafts, searchable |
+| **Recommendation (DSS)** | Go / Pilot / No-Go, data-driven |
 
-It runs as a **single self-contained file** (no server) and is shareable by
-link. Contact/evidence columns are wired and ready for the crawled contact data
-to plug in.
+It runs as a **single self-contained file** (no server) and is shareable by link.
+Contact/evidence columns are wired and ready for the contact data to plug in.
 
 ## 2. What's inside (capabilities)
 
@@ -70,7 +70,17 @@ to Springboard**?
 
 ---
 
-## 5. Status at a glance
+## 5. Current limitations (known — and how each closes)
+
+Being upfront about where the prototype stands:
+
+- **Prototype-grade data.** Runs on 27 companies sourced once by hand; employee sizes are approximate estimates and contact details aren't filled in yet. → closes with a licensed feed + contact enrichment.
+- **Not yet live-automated.** The pipeline is API-ready but currently sourced manually — automation is proven in design, not yet running end-to-end. → closes once a data key is added.
+- **Small scale.** 27 companies is a demo set; real BD needs hundreds. Scale is untested. → closes with the automated feed.
+- **No outcomes yet.** No real responses or meetings — the funnel is honestly near-empty past "drafted." A working tool, not yet traction (expected at this stage).
+- **Consolidation is at the feature/UI level.** The platform unifies the strongest features and structure; deeper data integration (e.g., contact enrichment) plugs in next.
+
+## 6. Status at a glance
 
 - ✅ **Done:** unified platform (5 views), ICP scoring, real Claude qualify + outreach, search, delivery sheet, automation scripts, handoff docs.
 - 🟡 **Proven via prototype data:** live demo on 27 real companies.

@@ -69,7 +69,7 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
   .msg{background:#f9fafb;border:1px solid var(--bd);border-radius:10px;padding:13px 15px;font-size:12.5px;line-height:1.7;white-space:pre-wrap;color:#374151;max-height:280px;overflow:auto}
   .empty{color:#c0c4cc}
   .row2{display:flex;gap:18px;flex-wrap:wrap}.row2>*{flex:1;min-width:280px}
-  #detail{position:fixed;top:0;right:0;width:420px;max-width:92vw;height:100vh;background:#fff;box-shadow:-8px 0 30px rgba(0,0,0,.14);padding:24px;overflow:auto;transform:translateX(100%);transition:.18s}
+  #detail{position:fixed;top:0;right:0;width:420px;max-width:92vw;height:100vh;background:#fff;box-shadow:-8px 0 30px rgba(0,0,0,.14);padding:24px;overflow:auto;transform:translateX(100%);transition:.18s;z-index:1000}
   #detail.on{transform:translateX(0)}
   #detail .x{float:right;cursor:pointer;color:#9ca3af;font-size:22px;line-height:1}
   #detail h3{font-size:18px;margin-bottom:2px} .kv{font-size:12.5px;color:#374151;margin:8px 0}
