@@ -29,6 +29,18 @@ def _employees() -> dict:
         return {r["company_name"]: r.get("employees", "") for r in csv.DictReader(f)}
 
 
+def _events() -> dict:
+    """Funnel stage → number of distinct companies at that stage (from log_event.py)."""
+    p = DATA_DIR / "pipeline_events.csv"
+    if not p.exists():
+        return {}
+    by_stage: dict[str, set] = {}
+    with p.open(encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            by_stage.setdefault(r.get("stage", ""), set()).add(r.get("company_name", ""))
+    return {k: len(v) for k, v in by_stage.items()}
+
+
 HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
@@ -103,6 +115,7 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <div id="detail"></div>
 <script>
 const DATA = __DATA__;
+const EVENTS = __EVENTS__;              // funnel stage → distinct company count (from log_event.py)
 const AW = ["Jake","Mel","Rey"];       // approval chain
 const state = {};                        // per-company approval step
 DATA.forEach(d=> state[d.company]=0);
@@ -120,16 +133,16 @@ function counts(){
 }
 // funnel — HONEST: only stages backed by real events
 function funnel(){
-  const c=counts();
+  const c=counts(), e=EVENTS||{};
   return [
     ["1 · Target Identification", c.n],
     ["2 · Contact Identification", c.withC],
     ["3 · Outreach Drafted", c.withM],
-    ["4 · Outreach Sent", 0],
-    ["5 · Response", 0],
-    ["6 · Verification Call", 0],
-    ["7 · Meeting / Interest", 0],
-    ["8 · Korea Visit", 0],
+    ["4 · Outreach Sent", e.outreach_sent||0],
+    ["5 · Response", e.reply_received||0],
+    ["6 · Verification Call", e.call_booked||0],
+    ["7 · Meeting / Interest", e.concrete_interest||0],
+    ["8 · Korea Visit", e.korea_visit_ready||0],
   ];
 }
 
@@ -270,8 +283,10 @@ def main() -> None:
     for r in rows:
         r["employees"] = emp.get(r["company"], "")
     payload = json.dumps(rows, ensure_ascii=False)
+    events = json.dumps(_events(), ensure_ascii=False)
     out = DATA_DIR / "platform.html"
-    out.write_text(HTML.replace("__DATA__", payload), encoding="utf-8")
+    out.write_text(HTML.replace("__DATA__", payload).replace("__EVENTS__", events),
+                   encoding="utf-8")
     print(f"Wrote {out} — {len(rows)} leads, 5-view consolidated platform.")
 
 
