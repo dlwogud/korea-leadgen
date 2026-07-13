@@ -79,6 +79,11 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
   .bar .lbl{position:absolute;left:12px;top:0;line-height:28px;font-size:12px;color:#1f2937;font-weight:600;z-index:1}
   .bar .val{position:absolute;right:12px;top:0;line-height:28px;font-size:12px;color:#1f2937;font-weight:700;z-index:1}
   .msg{background:#f9fafb;border:1px solid var(--bd);border-radius:10px;padding:13px 15px;font-size:12.5px;line-height:1.7;white-space:pre-wrap;color:#374151;max-height:280px;overflow:auto}
+  textarea.msg{width:100%;min-height:190px;max-height:none;resize:vertical;font-family:inherit;outline:none;display:block}
+  textarea.msg:focus{border-color:var(--accent)}
+  .draftbar{display:flex;align-items:center;gap:8px;margin-top:8px}
+  .copybtn{padding:6px 14px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:12px;font-weight:600;cursor:pointer}
+  .resetbtn{padding:6px 12px;border:1px solid var(--bd);border-radius:8px;background:#fff;color:var(--faint);font-size:12px;cursor:pointer}
   .empty{color:#c0c4cc}
   .row2{display:flex;gap:18px;flex-wrap:wrap}.row2>*{flex:1;min-width:280px}
   #detail{position:fixed;top:0;right:0;width:420px;max-width:92vw;height:100vh;background:#fff;box-shadow:-8px 0 30px rgba(0,0,0,.14);padding:24px;overflow:auto;transform:translateX(100%);transition:.18s;z-index:1000}
@@ -116,6 +121,20 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <script>
 const DATA = __DATA__;
 const EVENTS = __EVENTS__;              // funnel stage → distinct company count (from log_event.py)
+let EDITS = {};                          // in-browser outreach edits (localStorage)
+try { EDITS = JSON.parse(localStorage.getItem("km_edits") || "{}"); } catch(e) { EDITS = {}; }
+
+function curDraft(co){ if(EDITS[co]!=null) return EDITS[co]; const d=DATA.find(x=>x.company===co); return (d&&d.message)||""; }
+function saveEdit(co,v){ EDITS[co]=v; try{ localStorage.setItem("km_edits", JSON.stringify(EDITS)); }catch(e){} }
+function resetDraft(co){ delete EDITS[co]; try{ localStorage.setItem("km_edits", JSON.stringify(EDITS)); }catch(e){}
+  renderOutreachRows(); if(document.getElementById("detail").classList.contains("on")) openLead(co); }
+function copyDraft(co,btn){ const t=curDraft(co); navigator.clipboard.writeText(t).then(()=>{ const o=btn.textContent; btn.textContent="✓ Copied"; setTimeout(()=>btn.textContent=o,1200); }).catch(()=>{}); }
+function editableDraft(co){
+  return '<textarea class="msg" spellcheck="false" oninput=\\'saveEdit('+JSON.stringify(co)+',this.value)\\'>'+esc(curDraft(co))+'</textarea>'
+    +'<div class="draftbar"><button class="copybtn" onclick=\\'copyDraft('+JSON.stringify(co)+',this)\\'>📋 Copy</button>'
+    +'<button class="resetbtn" onclick=\\'resetDraft('+JSON.stringify(co)+')\\'>Reset to AI draft</button>'
+    +'<span class="empty" style="font-size:11px">edits saved in your browser</span></div>';
+}
 const AW = ["Jake","Mel","Rey"];       // approval chain
 const state = {};                        // per-company approval step
 DATA.forEach(d=> state[d.company]=0);
@@ -225,7 +244,7 @@ function renderOutreachRows(){
 function outreachCard(d){
   return '<div class="card"><h2 style="margin:0 0 8px">'+esc(d.company)
     +' <span class="pill '+(d.verdict||"")+'" style="margin-left:6px">'+(d.verdict||"")+'</span></h2>'
-    +'<div class="msg">'+esc(d.message)+'</div></div>';
+    +editableDraft(d.company)+'</div>';
 }
 function approvalUI(co){const s=state[co];
   return '<div class="aw">'+AW.map((n,i)=>'<span class="step '+(i<s?"done":"")+'">'+(i<s?"✓ ":"")+n+'</span>').join('<span style="color:#cbd5e1">→</span>')
@@ -262,7 +281,7 @@ function openLead(co){const d=DATA.find(x=>x.company===co);if(!d)return;
     +'<div class="sec-t">Tech stack</div><div class="kv">'+(esc(d.tech)||'—')+'</div>'
     +'<div class="sec-t">Contact (for crawled data)</div><div class="kv">'+(d.contact_name?esc(d.contact_name):"—")+(d.email?' · '+esc(d.email):"")+'</div>'
     +(d.url?'<div class="kv"><a class="jl" href="'+d.url+'" target="_blank">View job posting →</a></div>':"")
-    +'<div class="sec-t">✉️ Outreach draft</div>'+(d.message?'<div class="msg">'+esc(d.message)+'</div>':'<span class="empty">no draft</span>');
+    +'<div class="sec-t">✉️ Outreach draft (editable)</div>'+(d.message?editableDraft(d.company):'<span class="empty">no draft</span>');
   document.getElementById("detail").classList.add("on");
 }
 function closeD(){document.getElementById("detail").classList.remove("on");}
