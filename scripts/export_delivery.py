@@ -14,9 +14,8 @@ keyword) are included as blank columns for the team / enrichment to fill.
 from __future__ import annotations
 
 import csv
-from urllib.parse import quote
 
-from _common import DATA_DIR
+from _common import DATA_DIR, job_link
 
 OUT = DATA_DIR / "delivery.csv"
 
@@ -85,7 +84,7 @@ def main() -> None:
             "industry": _bi(lead.get("industry", "") or d.get("industry", ""), d.get("industry_en", "")),
             "company_size": d.get("employees", ""),
             "website": "",                                   # enrichment pending
-            "job_posting_url": d.get("source_url", "") or ("https://www.wanted.co.kr/search?query=" + quote(name)),
+            "job_posting_url": job_link(d.get("source_url", ""), d.get("source", ""), name),
             "hr_email": lead.get("email", "") or c.get("email", ""),
             "phone": c.get("phone", ""),                     # enrichment pending
             "hr_contact_name": lead.get("contact_name", "") or c.get("full_name", ""),

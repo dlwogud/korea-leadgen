@@ -12,9 +12,8 @@ from __future__ import annotations
 
 import csv
 import json
-from urllib.parse import quote
 
-from _common import DATA_DIR
+from _common import DATA_DIR, job_link
 
 OUT = DATA_DIR / "leads.html"
 
@@ -53,8 +52,8 @@ def build_dataset() -> list[dict]:
             "tech": (d.get("tech_stack", "") or "").replace(";", ", "),
             "region": _bi(d.get("locations", ""), d.get("location_en", "")),
             "roles": _bi((d.get("sample_titles", "") or s.get("sample_titles", "") or "").replace(";", ", "), (d.get("roles_en", "") or "").replace("; ", ", ").replace(";", ", ")),
-            "url": (d.get("source_url", "") or s.get("source_url", "")
-                    or ("https://www.wanted.co.kr/search?query=" + quote(name))),
+            "url": job_link(d.get("source_url", "") or s.get("source_url", ""),
+                            d.get("source", "") or s.get("source", ""), name),
             "contact_name": fn.get("contact_name", "") or c.get("full_name", ""),
             "contact_title": fn.get("contact_title", "") or c.get("title", ""),
             "email": fn.get("email", "") or c.get("email", ""),

@@ -9,6 +9,7 @@ from __future__ import annotations
 import csv
 import os
 from pathlib import Path
+from urllib.parse import quote
 
 # Project paths
 ROOT = Path(__file__).resolve().parent.parent
@@ -58,3 +59,17 @@ def write_companies(rows: list[dict], path: Path = RAW_CSV) -> None:
 def read_companies(path: Path = RAW_CSV) -> list[dict]:
     with path.open(encoding="utf-8") as f:
         return list(csv.DictReader(f))
+
+
+def job_link(source_url: str, source: str, company: str) -> str:
+    """A working posting link for any source: the real posting URL if we have
+    it, else a search on that source (Saramin / Wanted), else a Google search."""
+    if (source_url or "").strip():
+        return source_url.strip()
+    q = quote(company or "")
+    s = (source or "").lower()
+    if "saramin" in s:
+        return "https://www.saramin.co.kr/zf_user/search?searchword=" + q
+    if "wanted" in s:
+        return "https://www.wanted.co.kr/search?query=" + q
+    return "https://www.google.com/search?q=" + quote((company or "") + " 채용")
