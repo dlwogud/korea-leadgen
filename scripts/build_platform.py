@@ -147,10 +147,10 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 </div>
 <div id="detail"></div>
 <script>
-const DATA = __DATA__;
+let DATA = __DATA__;
 const EVENTS = __EVENTS__;              // funnel stage → distinct company count (from log_event.py)
-const CSV_COLS = __CSVCOLS__;           // delivery sheet columns (operational output)
-const CSV_ROWS = __CSV__;               // delivery sheet rows
+let CSV_COLS = __CSVCOLS__;             // delivery sheet columns (operational output)
+let CSV_ROWS = __CSV__;                 // delivery sheet rows
 function csvCell(v){ v=(v==null?"":""+v); const NL=String.fromCharCode(10), Q=String.fromCharCode(34);
   return (v.indexOf(",")>=0||v.indexOf(Q)>=0||v.indexOf(NL)>=0) ? Q+v.split(Q).join(Q+Q)+Q : v; }
 function downloadCSV(){
@@ -160,6 +160,42 @@ function downloadCSV(){
   const blob=new Blob([BOM+head+NL+body],{type:"text/csv;charset=utf-8;"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="korea-leads.csv"; a.click(); URL.revokeObjectURL(a.href);
 }
+function parseCSV(text){
+  if(text.charCodeAt(0)===65279) text=text.slice(1);
+  const Q=String.fromCharCode(34), NL=String.fromCharCode(10), CR=String.fromCharCode(13);
+  const rows=[]; let row=[], f="", inq=false;
+  for(let i=0;i<text.length;i++){ const ch=text[i];
+    if(inq){ if(ch===Q){ if(text[i+1]===Q){f+=Q;i++;} else inq=false; } else f+=ch; }
+    else if(ch===Q) inq=true;
+    else if(ch===",") { row.push(f); f=""; }
+    else if(ch===NL){ row.push(f); rows.push(row); row=[]; f=""; }
+    else if(ch===CR){}
+    else f+=ch; }
+  if(f.length||row.length){ row.push(f); rows.push(row); }
+  return rows;
+}
+function mapRow(r){ return {
+  company:r.company_name||"", company_en:"", service:r.best_service||"", fit:parseFloat(r.fit_score)||0,
+  hiring:r.open_roles||"", industry:r.industry||"", tech:r.tech_stack||"", region:r.location||"",
+  roles:r.roles||"", url:r.job_posting_url||"", contact_name:r.hr_contact_name||"", contact_title:"",
+  email:r.hr_email||"", linkedin:"", verdict:r.ai_verdict||"", confidence:"", reason:r.summary||"",
+  message:r.outreach_message||"", employees:r.company_size||"" }; }
+function importCSV(input){
+  const file=input.files[0]; if(!file) return;
+  const rd=new FileReader();
+  rd.onload=function(){
+    const cells=parseCSV(rd.result); if(cells.length<2){ alert("Empty CSV"); return; }
+    const cols=cells[0].map(c=>c.trim());
+    const rows=cells.slice(1).filter(r=>r.some(x=>(x||"").trim())).map(r=>{ const o={}; cols.forEach((c,i)=>o[c]=r[i]||""); return o; });
+    CSV_COLS=cols; CSV_ROWS=rows; DATA=rows.map(mapRow);
+    renderOverview(); renderPipeline(); renderOutreach();
+    alert("Loaded "+rows.length+" leads from "+file.name);
+  };
+  rd.readAsText(file);
+}
+function coverage(){ const R=CSV_ROWS||[]; const nz=k=>R.filter(r=>(r[k]||"").trim()).length;
+  return {total:R.length, emails:nz("hr_email"), phones:nz("phone"), websites:nz("website"),
+          drafts:nz("outreach_message"), fit:R.filter(r=>r.ai_verdict==="fit").length}; }
 let EDITS = {};                          // in-browser outreach edits (localStorage)
 try { EDITS = JSON.parse(localStorage.getItem("km_edits") || "{}"); } catch(e) { EDITS = {}; }
 
@@ -191,7 +227,7 @@ function counts(){
 }
 // funnel — HONEST: only stages backed by real events
 function renderOverview(){
-  const c=counts();
+  const c=counts(); const cov=coverage();
   const svc={}; DATA.forEach(d=>{const k=d.service||"—";svc[k]=(svc[k]||0)+1;});
   const svcRows=Object.entries(svc).sort((a,b)=>b[1]-a[1]).map(e=>barRow(e[0],e[1],DATA.length)).join("");
   const prc={High:0,Medium:0,Low:0}; DATA.forEach(d=>prc[pri(d)]++);
@@ -200,9 +236,11 @@ function renderOverview(){
     '<tr class="lead" onclick=\\'openLead('+JSON.stringify(d.company)+')\\'><td><b>'+esc(d.company)+'</b></td><td>'+pill(d.verdict)+'</td><td><span class="pill pri-'+pri(d)+'">'+pri(d)+'</span></td><td style="text-align:right"><b>'+d.fit.toFixed(0)+'</b></td></tr>').join("");
   document.getElementById("overview").innerHTML =
     '<h1>Overview</h1><div class="sub">AI-powered Korean lead generation for Springboard\\'s 4 services — sourced, scored, qualified &amp; drafted automatically.</div>'
-    +'<div style="margin-bottom:18px"><button class="setbtn go" onclick="downloadCSV()">⬇ Download lead list (CSV / Excel)</button></div>'
+    +'<div style="margin-bottom:18px"><button class="setbtn go" onclick="downloadCSV()">⬇ Download lead list (CSV / Excel)</button>'
+    +'<label class="setbtn" style="cursor:pointer">⬆ Import CSV<input type="file" accept=".csv" onchange="importCSV(this)" style="display:none"></label></div>'
+    +'<div class="sec-t" style="margin-bottom:6px">Data coverage</div>'
     +'<div class="cards">'
-    +stat(c.n,"Leads")+stat(c.fit,"AI-qualified <b>fit</b>")+stat(c.avg,"Avg fit score")+stat(c.withM,"Outreach drafts")
+    +stat(cov.total,"Total leads")+stat(cov.fit,"High-fit (ICP)")+stat(cov.emails+" / "+cov.total,"Emails")+stat(cov.phones+" / "+cov.total,"Phones")+stat(cov.websites+" / "+cov.total,"Websites")+stat(cov.drafts+" / "+cov.total,"Outreach drafts")
     +'</div>'
     +'<div class="row2"><div class="card"><h2>🏆 Leads (ranked) <span class="empty" style="font-size:12px;font-weight:400">· scroll for all '+DATA.length+'</span></h2><div style="max-height:300px;overflow:auto">'
     +'<table><tbody>'+top+'</tbody></table></div></div>'
