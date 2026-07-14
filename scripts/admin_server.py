@@ -12,6 +12,7 @@ Run:
 """
 from __future__ import annotations
 
+import csv
 import json
 import subprocess
 import sys
@@ -63,6 +64,45 @@ def write_env(updates: dict) -> None:
         if v.strip():                       # only overwrite when a value is given
             d[k] = v.strip()
     ENV.write_text("\n".join(f"{k}={v}" for k, v in d.items()) + "\n", encoding="utf-8")
+
+
+WORKSHEET = DATA / "contacts_worksheet.csv"
+WS_FIELDS = ["company_name", "full_name", "title", "email", "phone",
+             "linkedin_url", "is_decision_maker", "status", "notes"]
+
+
+def _run(script: str, *args):
+    return subprocess.run([sys.executable, str(ROOT / "scripts" / script), *args],
+                          capture_output=True, text=True)
+
+
+def save_contact(company: str, name: str, title: str, email: str, phone: str) -> str:
+    """Upsert a contact into contacts_worksheet.csv, rescore, rebuild. Returns new fit."""
+    rows = {}
+    if WORKSHEET.exists():
+        with WORKSHEET.open(encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                rows[r.get("company_name", "")] = r
+    r = rows.get(company, {"company_name": company})
+    r.update({"full_name": name, "title": title, "email": email, "phone": phone})
+    if name or email:                      # treat an entered contact as the decision-maker
+        r["is_decision_maker"] = "y"
+    rows[company] = r
+    with WORKSHEET.open("w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=WS_FIELDS)
+        w.writeheader()
+        for rr in rows.values():
+            w.writerow({k: rr.get(k, "") for k in WS_FIELDS})
+    # recompute score (reachability) + refresh the operational outputs
+    for s in ("rescore_with_contacts.py", "export_delivery.py", "build_platform.py"):
+        _run(s)
+    fl = DATA / "final_leads.csv"
+    if fl.exists():
+        with fl.open(encoding="utf-8") as f:
+            for r2 in csv.DictReader(f):
+                if r2.get("company_name") == company:
+                    return r2.get("fit_score", "")
+    return ""
 
 
 def run_pipeline(source: str) -> tuple[bool, str]:
@@ -119,6 +159,10 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/run":
             ok, log = run_pipeline(form.get("source", "wanted"))
             self._json({"ok": ok, "log": log})
+        elif path == "/save_contact":
+            fit = save_contact(form.get("company", ""), form.get("name", ""),
+                               form.get("title", ""), form.get("email", ""), form.get("phone", ""))
+            self._json({"ok": True, "fit_score": fit})
         else:
             self._json({"ok": False, "msg": "not found"}, code=404)
 

@@ -282,7 +282,20 @@ function cinput(f,label,fb){
 }
 function editableContact(d){
   return '<div class="cgrid">'+cinput("name","Name",d.contact_name)+cinput("title","Title",d.contact_title)
-    +cinput("email","Email",d.email)+cinput("phone","Phone","")+'</div>';
+    +cinput("email","Email",d.email)+cinput("phone","Phone","")+'</div>'
+    +'<div class="draftbar"><button class="copybtn" onclick="pushContact()">💾 Save contact (updates score)</button>'
+    +'<span id="cstat" class="empty" style="font-size:11px"></span></div>';
+}
+function pushContact(){
+  const c=CONTACTS[curCo]||{}, st=document.getElementById("cstat");
+  const body=new URLSearchParams();
+  body.append("company",curCo); body.append("name",c.name||""); body.append("title",c.title||"");
+  body.append("email",c.email||""); body.append("phone",c.phone||"");
+  if(st) st.textContent="Saving & rescoring…";
+  fetch("/save_contact",{method:"POST",body}).then(r=>r.json()).then(d=>{
+    if(d.ok){ if(st) st.textContent="✓ Saved — fit "+(d.fit_score||"?")+", reloading…"; setTimeout(()=>location.reload(),900); }
+    else if(st) st.textContent="Saved locally only.";
+  }).catch(()=>{ if(st) st.textContent="⚠️ No backend — saved in this browser only. Run scripts/admin_server.py to save & rescore."; });
 }
 function openLead(co){const d=DATA.find(x=>x.company===co);if(!d)return; curCo=co;
   document.getElementById("detail").innerHTML =
