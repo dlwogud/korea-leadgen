@@ -136,6 +136,59 @@ Both give a permanent URL. `platform.html` is self-contained (no server needed).
 
 ---
 
+## Team-wide deployment (internal server)
+
+Three ways to use the platform, simplest → full:
+
+| Mode | Who can use it | Collect / keys work? |
+|------|----------------|----------------------|
+| **Static link** (GitHub Pages / Netlify) | anyone with the link | ❌ view-only |
+| **Local admin server** (`admin_server.py`) | one machine (localhost) | ✅ |
+| **Internal server** | the whole team, on the internal network | ✅ |
+
+For team-wide "enter keys → collect", run the admin server on an always-on
+**internal** machine:
+
+1. Put the repo + `.env` on the server; `pip3 install -r requirements.txt`.
+2. Let teammates reach it by binding to the network instead of localhost — in
+   `scripts/admin_server.py` change the last line:
+   ```python
+   HTTPServer(("127.0.0.1", PORT), Handler)   # → ("0.0.0.0", PORT)
+   ```
+   ⚠️ **Only on a trusted internal network (office LAN / VPN).** The panel holds
+   API keys and can run collection — **never expose it to the public internet.**
+   Put a reverse proxy (nginx / Caddy) with basic-auth or SSO in front, and
+   firewall it to the office network.
+3. Auto-start it so it's always up:
+
+   **Linux (systemd)** — `/etc/systemd/system/leadgen-admin.service`:
+   ```ini
+   [Unit]
+   Description=Lead-Gen admin server
+   After=network.target
+   [Service]
+   WorkingDirectory=/opt/korea-leadgen
+   ExecStart=/usr/bin/python3 scripts/admin_server.py
+   Restart=always
+   [Install]
+   WantedBy=multi-user.target
+   ```
+   ```bash
+   sudo systemctl enable --now leadgen-admin
+   ```
+
+   **macOS (launchd)** — a `~/Library/LaunchAgents/leadgen-admin.plist` whose
+   `ProgramArguments` runs `python3 .../scripts/admin_server.py` with
+   `RunAtLoad=true`, then `launchctl load` it.
+
+4. The team opens `http://<internal-host>:8765` → **Settings** → keys → Collect.
+
+**Security summary:** keys stay in `.env` on the server (gitignored); keep the
+panel on the internal network only + auth in front. The public/shareable link
+stays the static (view-only) GitHub Pages version.
+
+---
+
 ## Data source options
 
 | Source | How | Notes |
