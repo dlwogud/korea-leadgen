@@ -27,14 +27,33 @@ from _common import DATA_DIR, RAW_CSV, SCORED_CSV, ensure_data_dir, read_compani
 INTENT_SATURATION = 5   # this many open dev roles ≈ a strong, saturated signal
 
 
+def size_fit(employees: str) -> float:
+    """0..1 — how well headcount matches the 20-300 ICP band.
+
+    Unknown size stays a neutral 0.5 placeholder (most Wanted-only rows). Once a
+    real count is enriched (DART / 국민연금), it actually drives the score: an
+    in-band company scores full, an over-300 enterprise decays so it no longer
+    ties a perfect-fit SMB on points."""
+    e = (employees or "").strip()
+    if not e.isdigit():
+        return 0.5                       # unknown → neutral
+    n = int(e)
+    if 20 <= n <= 300:
+        return 1.0                       # squarely in the ICP band
+    if n < 20:
+        return 0.4                       # too small / pre-traction
+    if n <= 500:
+        return 0.3                       # over the band — has its own dev team
+    return 0.1                           # clearly enterprise
+
+
 def firmographic_score(row: dict) -> float:
-    """0..1 — industry fit (vs the ICP for this lead's best service) + size placeholder."""
+    """0..1 — industry fit (vs the ICP for this lead's best service) + size fit."""
     industry = row.get("industry", "") or ""
     best = row.get("best_service") or "it_servicing"
     targets = icp.target_industries(best)
     industry_fit = 1.0 if any(t.lower() in industry.lower() for t in targets) else 0.4
-    size_placeholder = 0.5  # unknown from job data; enriched later via DART
-    return (industry_fit + size_placeholder) / 2
+    return (industry_fit + size_fit(row.get("employees", ""))) / 2
 
 
 def intent_score(hiring_count: int) -> float:
