@@ -112,7 +112,6 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
     <a data-v="pipeline">🗂️ Pipeline</a>
     <a data-v="funnel">📉 KPI Funnel</a>
     <a data-v="outreach">✉️ Outreach Studio</a>
-    <a data-v="reco">🎯 Recommendation</a>
     <a data-v="settings">⚙️ Settings</a>
   </div>
   <div class="foot">Team build — AI engine (Claude) · ICP scoring · pipeline · funnel · outreach · DSS. Data: demo (real listings); production switches to a licensed API.</div>
@@ -122,7 +121,6 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
   <section id="pipeline"></section>
   <section id="funnel"></section>
   <section id="outreach"></section>
-  <section id="reco"></section>
   <section id="settings"></section>
 </div>
 <div id="detail"></div>
@@ -261,21 +259,6 @@ function approvalUI(co){const s=state[co];
 }
 function appr(co){if(state[co]<3)state[co]++;renderOutreachRows();}
 
-function renderReco(){
-  const c=counts();
-  // data-driven provisional recommendation
-  let v,cls,why;
-  if(c.fit>=3){v="PILOT";cls="pilot";why="There are "+c.fit+" AI-qualified 'fit' leads — enough to run a focused outreach pilot and measure real response before a full Korea visit.";}
-  else if(c.fit>=1){v="PILOT";cls="pilot";why="A small number of qualified leads exist; validate with a limited outreach test first.";}
-  else {v="NO-GO (yet)";cls="nogo";why="No qualified 'fit' leads yet — keep sourcing before committing.";}
-  document.getElementById("reco").innerHTML =
-    '<h1>Recommendation (DSS)</h1><div class="sub">Go / Pilot / No-Go — provisional, from current data. Finalizes at project end with real response data.</div>'
-    +'<div class="card"><div class="sec-t">Provisional decision</div><div class="rec '+cls+'">'+v+'</div><div class="kv">'+why+'</div></div>'
-    +'<div class="row2"><div class="card"><h2>Signals we have</h2>'
-    +'<div class="kv">✅ '+c.fit+' qualified fit leads</div><div class="kv">📊 '+c.n+' companies sourced, avg fit '+c.avg+'</div><div class="kv">✉️ '+c.withM+' outreach drafts ready</div></div>'
-    +'<div class="card"><h2>Signals we still need (honesty)</h2><div class="kv">⏳ Actual outreach responses</div><div class="kv">⏳ Verification calls / meetings</div><div class="kv">⏳ Confirmed business interest</div>'
-    +'<div class="note" style="margin-top:8px">Go requires real response + meeting data — not yet available, so we don\\'t claim it.</div></div></div>';
-}
 
 // detail panel
 function openLead(co){const d=DATA.find(x=>x.company===co);if(!d)return;
@@ -334,7 +317,7 @@ function collect(src){
   const body=new URLSearchParams(); body.append("source",src);
   fetch("/run",{method:"POST",body}).then(r=>r.json()).then(d=>{ setStatus(d.log||"done"); if(d.ok) setTimeout(()=>location.reload(),1800); }).catch(()=>setStatus(NOBK));
 }
-renderOverview();renderPipeline();renderFunnel();renderOutreach();renderReco();renderSettings();
+renderOverview();renderPipeline();renderFunnel();renderOutreach();renderSettings();
 </script></body></html>"""
 
 
