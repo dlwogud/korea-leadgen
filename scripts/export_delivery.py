@@ -14,6 +14,7 @@ keyword) are included as blank columns for the team / enrichment to fill.
 from __future__ import annotations
 
 import csv
+from urllib.parse import quote
 
 from _common import DATA_DIR
 
@@ -25,6 +26,7 @@ FIELDS = [
     "industry",           # 업종
     "company_size",       # 회사 규모 (approx. employees)
     "website",            # 공식 웹사이트 (enrichment pending)
+    "job_posting_url",    # 채용공고 링크
     "hr_email",           # HR 이메일
     "phone",              # 전화번호 (enrichment pending)
     "hr_contact_name",    # HR 담당자명
@@ -83,6 +85,7 @@ def main() -> None:
             "industry": _bi(lead.get("industry", "") or d.get("industry", ""), d.get("industry_en", "")),
             "company_size": d.get("employees", ""),
             "website": "",                                   # enrichment pending
+            "job_posting_url": d.get("source_url", "") or ("https://www.wanted.co.kr/search?query=" + quote(name)),
             "hr_email": lead.get("email", "") or c.get("email", ""),
             "phone": c.get("phone", ""),                     # enrichment pending
             "hr_contact_name": lead.get("contact_name", "") or c.get("full_name", ""),

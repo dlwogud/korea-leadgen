@@ -231,7 +231,7 @@ function renderRows(){
   const rows=[...DATA].filter(d=>matchLead(d,t)).sort((a,b)=>{let x=a[sortK],y=b[sortK];if(sortK==="fit")return (y-x)*sortD;if(x<y)return -1*sortD;if(x>y)return 1*sortD;return 0;});
   document.getElementById("pbody").innerHTML = rows.map(d=>{const p=pri(d);
       return '<tr class="lead" onclick=\\'openLead('+JSON.stringify(d.company)+')\\'>'
-      +'<td><b>'+esc(d.company)+'</b><br><span class="empty" style="font-size:11px">'+esc(d.industry)+'</span></td>'
+      +'<td><b>'+esc(d.company)+'</b>'+(d.url?' <a class="jl" href="'+d.url+'" target="_blank" onclick="event.stopPropagation()" title="View job posting">🔗</a>':'')+'<br><span class="empty" style="font-size:11px">'+esc(d.industry)+'</span></td>'
       +'<td><span class="chip">'+esc(d.service||"—")+'</span></td>'
       +'<td><b>'+d.fit.toFixed(0)+'</b></td>'
       +'<td><span class="pill pri-'+p+'">'+p+'</span></td>'
