@@ -90,6 +90,9 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
   .krow{margin-bottom:12px} .krow label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
   .krow input{width:100%;padding:9px 11px;border:1px solid var(--bd);border-radius:9px;font-size:13px}
   .setlog{background:#0f1222;color:#cbd5e1;padding:12px;border-radius:10px;font-size:12px;white-space:pre-wrap;max-height:300px;overflow:auto;margin:0}
+  .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+  .cin label{display:block;font-size:11px;color:#9ca3af;font-weight:600;margin-bottom:2px}
+  .cin input{width:100%;padding:7px 9px;border:1px solid var(--bd);border-radius:8px;font-size:12.5px}
   .empty{color:#c0c4cc}
   .row2{display:flex;gap:18px;flex-wrap:wrap}.row2>*{flex:1;min-width:280px}
   #detail{position:fixed;top:0;right:0;width:420px;max-width:92vw;height:100vh;background:#fff;box-shadow:-8px 0 30px rgba(0,0,0,.14);padding:24px;overflow:auto;transform:translateX(100%);transition:.18s;z-index:1000}
@@ -110,7 +113,6 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
   <div class="nav">
     <a data-v="overview" class="on">📊 Overview</a>
     <a data-v="pipeline">🗂️ Pipeline</a>
-    <a data-v="funnel">📉 KPI Funnel</a>
     <a data-v="outreach">✉️ Outreach Studio</a>
     <a data-v="settings">⚙️ Settings</a>
   </div>
@@ -119,7 +121,6 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <div class="main">
   <section id="overview" class="on"></section>
   <section id="pipeline"></section>
-  <section id="funnel"></section>
   <section id="outreach"></section>
   <section id="settings"></section>
 </div>
@@ -157,20 +158,6 @@ function counts(){
   return {n:DATA.length, fit, withC, withM, avg};
 }
 // funnel — HONEST: only stages backed by real events
-function funnel(){
-  const c=counts(), e=EVENTS||{};
-  return [
-    ["1 · Target Identification", c.n],
-    ["2 · Contact Identification", c.withC],
-    ["3 · Outreach Drafted", c.withM],
-    ["4 · Outreach Sent", e.outreach_sent||0],
-    ["5 · Response", e.reply_received||0],
-    ["6 · Verification Call", e.call_booked||0],
-    ["7 · Meeting / Interest", e.concrete_interest||0],
-    ["8 · Korea Visit", e.korea_visit_ready||0],
-  ];
-}
-
 function renderOverview(){
   const c=counts();
   const svc={}; DATA.forEach(d=>{const k=d.service||"—";svc[k]=(svc[k]||0)+1;});
@@ -187,9 +174,7 @@ function renderOverview(){
     +'<div class="row2"><div class="card"><h2>🏆 Leads (ranked) <span class="empty" style="font-size:12px;font-weight:400">· scroll for all '+DATA.length+'</span></h2><div style="max-height:300px;overflow:auto">'
     +'<table><tbody>'+top+'</tbody></table></div></div>'
     +'<div class="card"><h2>Service mix</h2>'+svcRows
-    +'<h2 style="margin-top:16px">Priority</h2>'+prRows+'</div></div>'
-    +'<div class="card"><h2>📉 Pipeline funnel</h2>'+funnel().map(f=>barRow(f[0],f[1],c.n)).join("")
-    +'<div class="note" style="margin-top:10px">Stages 4–8 stay at 0 until outreach is actually sent — <b>honesty principle</b>, no fake data.</div></div>';
+    +'<h2 style="margin-top:16px">Priority</h2>'+prRows+'</div></div>';
 }
 const stat = (n,l)=>'<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>';
 function barRow(label,val,max){const p=(max&&val>0)?Math.max(7,Math.round(val/max*100)):0;
@@ -224,13 +209,6 @@ function renderRows(){
 }
 function sortP(k){sortD=(sortK===k)?-sortD:(k==="fit"?-1:1);sortK=k;renderRows();}
 
-function renderFunnel(){
-  const c=counts();
-  document.getElementById("funnel").innerHTML =
-    '<h1>KPI Funnel</h1><div class="sub">The playbook\\'s 8-stage funnel. Real events only (honesty principle).</div>'
-    +'<div class="card">'+funnel().map(f=>barRow(f[0],f[1],c.n)).join("")+'</div>'
-    +'<div class="note">Stages 4–8 are 0 because no outreach has actually been sent yet — drafts are ready and awaiting approval. They fill in as real responses/meetings happen.</div>';
-}
 
 function renderOutreach(){
   document.getElementById("outreach").innerHTML =
@@ -261,7 +239,19 @@ function appr(co){if(state[co]<3)state[co]++;renderOutreachRows();}
 
 
 // detail panel
-function openLead(co){const d=DATA.find(x=>x.company===co);if(!d)return;
+let CONTACTS = {};
+try { CONTACTS = JSON.parse(localStorage.getItem("km_contacts") || "{}"); } catch(e) { CONTACTS = {}; }
+let curCo = null;
+function cval(f,fb){ const c=CONTACTS[curCo]; return (c && c[f]!=null) ? c[f] : (fb||""); }
+function saveContact(f,v){ if(!CONTACTS[curCo]) CONTACTS[curCo]={}; CONTACTS[curCo][f]=v; try{ localStorage.setItem("km_contacts", JSON.stringify(CONTACTS)); }catch(e){} }
+function cinput(f,label,fb){
+  return '<div class="cin"><label>'+label+'</label><input value="'+esc(cval(f,fb)).split('"').join("&quot;")+'" oninput="saveContact(\\''+f+'\\',this.value)"></div>';
+}
+function editableContact(d){
+  return '<div class="cgrid">'+cinput("name","Name",d.contact_name)+cinput("title","Title",d.contact_title)
+    +cinput("email","Email",d.email)+cinput("phone","Phone","")+'</div>';
+}
+function openLead(co){const d=DATA.find(x=>x.company===co);if(!d)return; curCo=co;
   document.getElementById("detail").innerHTML =
     '<span class="x" onclick="closeD()">×</span><h3>'+esc(d.company)+'</h3>'
     +'<div class="empty" style="font-size:12px">'+esc(d.industry)+' · '+esc(d.region)+'</div>'
@@ -270,7 +260,7 @@ function openLead(co){const d=DATA.find(x=>x.company===co);if(!d)return;
     +'<div class="sec-t">🤖 AI qualification</div><div class="kv">'+(d.reason?esc(d.reason):'<span class="empty">not run</span>')+'</div>'
     +'<div class="sec-t">Open roles</div><div class="kv">'+(esc(d.roles)||'—')+'</div>'
     +'<div class="sec-t">Tech stack</div><div class="kv">'+(esc(d.tech)||'—')+'</div>'
-    +'<div class="sec-t">Contact (for crawled data)</div><div class="kv">'+(d.contact_name?esc(d.contact_name):"—")+(d.email?' · '+esc(d.email):"")+'</div>'
+    +'<div class="sec-t">Contact (editable)</div>'+editableContact(d)
     +(d.url?'<div class="kv"><a class="jl" href="'+d.url+'" target="_blank">View job posting →</a></div>':"")
     +'<div class="sec-t">✉️ Outreach draft (editable)</div>'+(d.message?editableDraft(d.company):'<span class="empty">no draft</span>');
   document.getElementById("detail").classList.add("on");
@@ -317,7 +307,7 @@ function collect(src){
   const body=new URLSearchParams(); body.append("source",src);
   fetch("/run",{method:"POST",body}).then(r=>r.json()).then(d=>{ setStatus(d.log||"done"); if(d.ok) setTimeout(()=>location.reload(),1800); }).catch(()=>setStatus(NOBK));
 }
-renderOverview();renderPipeline();renderFunnel();renderOutreach();renderSettings();
+renderOverview();renderPipeline();renderOutreach();renderSettings();
 </script></body></html>"""
 
 
