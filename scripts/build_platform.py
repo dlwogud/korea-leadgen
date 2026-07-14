@@ -308,21 +308,21 @@ function renderSettings(){
   document.getElementById("settings").innerHTML =
     '<h1>⚙️ Settings — data sources</h1><div class="sub">Enter API keys, then collect. Works when opened via the internal admin server (scripts/admin_server.py, localhost); on the shared link it is view-only.</div>'
     +'<div class="card"><h2>API keys</h2>'
-    +keyRow("ANTHROPIC_API_KEY","Anthropic (Claude)","AI 자격심사 + 아웃리치")
-    +keyRow("SARAMIN_API_KEY","Saramin (사람인)","채용 소스 API — client 준비됨")
-    +keyRow("WANTED_API_KEY","Wanted (원티드)","공식 API 키 — 확보 후 client 연결 (지금은 크롤링)")
-    +keyRow("JOBKOREA_API_KEY","JobKorea (잡코리아)","공식 API/파트너십 확보 후 client 연결")
-    +keyRow("DART_API_KEY","DART (금융감독원)","기업 규모 enrichment (채용 아님)")
+    +keyRow("ANTHROPIC_API_KEY","Anthropic (Claude)","AI qualification + outreach")
+    +keyRow("SARAMIN_API_KEY","Saramin","Job-source API — client ready")
+    +keyRow("WANTED_API_KEY","Wanted","Official API key — currently scraping; wire a client once obtained")
+    +keyRow("JOBKOREA_API_KEY","JobKorea","Wire a client once official API / partnership is obtained")
+    +keyRow("DART_API_KEY","DART (FSS)","Company-size enrichment (not a job source)")
     +'<button class="setbtn" onclick="saveKeys()">💾 Save keys</button></div>'
     +'<div class="card"><h2>Collect + run pipeline</h2>'
-    +'<div class="note">소스 선택 → 수집 → ICP 점수 → Claude 심사·아웃리치 → 플랫폼 갱신. 현재: 원티드=크롤링, 사람인=API(client 준비). 원티드·잡코리아 공식 API는 확보 후 해당 source client를 연결하면 이 버튼이 API로 전환됩니다.</div>'
-    +'<button class="setbtn go" onclick=\\'collect("wanted")\\'>▶ Wanted (지금: 크롤링)</button>'
+    +'<div class="note">Pick a source → collect → ICP score → Claude qualify + outreach → rebuild platform. Today: Wanted = scraping, Saramin = API (client ready). Once official Wanted / JobKorea APIs are obtained, wire the matching source client and these buttons switch to the API.</div>'
+    +'<button class="setbtn go" onclick=\\'collect("wanted")\\'>▶ Wanted (now: scraping)</button>'
     +'<button class="setbtn go" onclick=\\'collect("saramin")\\'>▶ Saramin (API)</button>'
-    +'<button class="setbtn go" onclick=\\'collect("jobkorea")\\'>▶ JobKorea (API 확보 시)</button></div>'
+    +'<button class="setbtn go" onclick=\\'collect("jobkorea")\\'>▶ JobKorea (once API obtained)</button></div>'
     +'<div class="card"><div class="sec-t">Status</div><pre id="setlog" class="setlog">idle</pre></div>';
 }
 function setStatus(t){ const el=document.getElementById("setlog"); if(el) el.textContent=t; }
-const NOBK = "⚠️ 이 화면엔 백엔드가 없습니다. 수집/저장은 scripts/admin_server.py 로 실행한 localhost 화면에서만 작동합니다.";
+const NOBK = "⚠️ No backend on this page. Saving/collecting only works when opened via scripts/admin_server.py (localhost).";
 function saveKeys(){
   const body=new URLSearchParams();
   ["ANTHROPIC_API_KEY","SARAMIN_API_KEY","WANTED_API_KEY","JOBKOREA_API_KEY","DART_API_KEY"].forEach(k=>{ const el=document.getElementById(k); if(el&&el.value) body.append(k,el.value); });
@@ -330,7 +330,7 @@ function saveKeys(){
   fetch("/save",{method:"POST",body}).then(r=>r.json()).then(d=>setStatus(d.msg||"Saved")).catch(()=>setStatus(NOBK));
 }
 function collect(src){
-  setStatus("Collecting from "+src+"… 전체 파이프라인 실행 중 (1~2분). 완료되면 자동 새로고침됩니다.");
+  setStatus("Collecting from "+src+"… running the full pipeline (~1–2 min). The page reloads automatically when done.");
   const body=new URLSearchParams(); body.append("source",src);
   fetch("/run",{method:"POST",body}).then(r=>r.json()).then(d=>{ setStatus(d.log||"done"); if(d.ok) setTimeout(()=>location.reload(),1800); }).catch(()=>setStatus(NOBK));
 }
