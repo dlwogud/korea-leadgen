@@ -67,45 +67,51 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Korea Lead-Gen — Leads</title><style>
-  :root{--bd:#edeff3;--mut:#6b7280;--faint:#9ca3af;--ink:#111827;--accent:#4f46e5}
+  :root{
+    --page:#F9F8F7;--surface:#FFFFFF;--card:#F4F3F1;--line:#E0DFDD;
+    --ink:#111111;--ink-mid:#52514E;--ink-mute:#888780;
+    --accent:#3778D6;--brand-bg:#E6F1FC;--brand-600:#2A5FB0;
+    --positive-700:#0E7D56;--positive-bg:#EAF9DE;--warn-700:#9A6B00;--warn-bg:#FAEEDA;
+    --bd:#E0DFDD;--mut:#52514E;--faint:#888780;
+  }
   *{box-sizing:border-box}
-  body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:#f4f5f8;color:var(--ink);margin:0;padding:32px 20px;-webkit-font-smoothing:antialiased}
+  body{font-family:Inter,"Apple SD Gothic Neo","Noto Sans KR",system-ui,-apple-system,sans-serif;font-size:13px;background:var(--page);color:var(--ink);margin:0;padding:32px 20px;-webkit-font-smoothing:antialiased}
   .wrap{max-width:1120px;margin:0 auto}
   .head{margin-bottom:18px}
-  h1{font-size:22px;font-weight:700;margin:0 0 3px;letter-spacing:-.01em}
+  h1{font-size:20px;font-weight:600;margin:0 0 3px;letter-spacing:-.01em}
   .sub{color:var(--mut);font-size:13px}
   .stats{display:flex;gap:12px;margin:16px 0}
-  .stat{flex:1;background:#fff;border-radius:14px;padding:14px 18px;box-shadow:0 1px 3px rgba(16,24,40,.06)}
-  .stat .n{font-size:22px;font-weight:700;letter-spacing:-.02em} .stat .l{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+  .stat{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px}
+  .stat .n{font-size:24px;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums} .stat .l{font-size:10px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
   .tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-  input,select{padding:9px 12px;border:1px solid var(--bd);border-radius:10px;font-size:13px;background:#fff;color:var(--ink);outline:none}
-  input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+  input,select{padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:var(--surface);color:var(--ink);outline:none}
+  input:focus,select:focus{border-color:var(--accent)}
   input{flex:1;min-width:200px}
   .layout{display:flex;gap:16px;align-items:flex-start}
-  .card{background:#fff;border-radius:16px;box-shadow:0 1px 3px rgba(16,24,40,.06),0 1px 2px rgba(16,24,40,.04)}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px}
   .list{flex:1.1;max-height:78vh;overflow-y:auto} .detail{flex:1;padding:22px 24px;position:sticky;top:32px}
   table{width:100%;border-collapse:collapse;font-size:13px}
-  th{text-align:left;color:var(--faint);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:12px 16px;border-bottom:1px solid var(--bd);cursor:pointer;user-select:none;position:sticky;top:0;background:#fff;z-index:1}
-  td{padding:12px 16px;border-bottom:1px solid #f4f5f7;vertical-align:middle}
+  th{text-align:left;color:var(--ink-mute);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none;position:sticky;top:0;background:var(--surface);z-index:1}
+  td{padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:middle;font-variant-numeric:tabular-nums}
   tr:last-child td{border-bottom:none}
-  tr.row{cursor:pointer;transition:background .1s} tr.row:hover{background:#fafbfc} tr.sel{background:#f5f3ff;box-shadow:inset 3px 0 0 var(--accent)}
-  .score{font-weight:700;color:var(--accent);font-size:15px}
-  .chip{display:inline-block;background:#eef2ff;color:#4338ca;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:500}
-  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
-  .pill-fit{background:#dcfce7;color:#15803d} .pill-maybe{background:#fef3c7;color:#b45309} .pill-not_fit{background:#fee2e2;color:#b91c1c} .pill-{background:#f3f4f6;color:#9ca3af}
-  .detail h2{font-size:18px;font-weight:700;margin:0 0 3px;letter-spacing:-.01em} .detail .meta{color:var(--mut);font-size:12px;margin-bottom:16px}
-  .sec{margin:16px 0} .sec .lbl{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:6px}
-  .reason{font-size:13px;color:#374151;line-height:1.6;margin-top:6px}
-  .msg{background:#f9fafb;border:1px solid var(--bd);border-radius:10px;padding:14px 16px;font-size:13px;line-height:1.7;white-space:pre-wrap;color:#374151}
+  tr.row{cursor:pointer;transition:background .1s} tr.row:hover{background:var(--card)} tr.sel{background:var(--brand-bg);box-shadow:inset 3px 0 0 var(--accent)}
+  .score{font-weight:600;color:var(--accent);font-size:15px;font-variant-numeric:tabular-nums}
+  .chip{display:inline-block;background:var(--brand-bg);color:var(--brand-600);border-radius:4px;padding:2px 6px;font-size:10px;font-weight:500}
+  .pill{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:500}
+  .pill-fit{background:var(--positive-bg);color:var(--positive-700)} .pill-maybe{background:var(--warn-bg);color:var(--warn-700)} .pill-not_fit{background:#FBE9E9;color:#B42318} .pill-{background:var(--card);color:var(--ink-mute)}
+  .detail h2{font-size:18px;font-weight:600;margin:0 0 3px;letter-spacing:-.01em} .detail .meta{color:var(--mut);font-size:12px;margin-bottom:16px}
+  .sec{margin:16px 0} .sec .lbl{font-size:10px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:6px}
+  .reason{font-size:13px;color:var(--ink-mid);line-height:1.6;margin-top:6px}
+  .msg{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:13px;line-height:1.7;white-space:pre-wrap;color:var(--ink-mid)}
   textarea.msg{width:100%;min-height:190px;resize:vertical;font-family:inherit;outline:none;display:block}
-  textarea.msg:focus{border-color:#4f46e5}
+  textarea.msg:focus{border-color:var(--accent)}
   .draftbar{display:flex;gap:8px;margin-top:8px}
-  .copybtn{padding:6px 14px;border:none;border-radius:8px;background:#4f46e5;color:#fff;font-size:12px;font-weight:600;cursor:pointer}
-  .resetbtn{padding:6px 12px;border:1px solid var(--bd);border-radius:8px;background:#fff;color:#6b7280;font-size:12px;cursor:pointer}
+  .copybtn{padding:6px 14px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:12px;font-weight:500;cursor:pointer}
+  .resetbtn{padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink-mid);font-size:12px;cursor:pointer}
   .kv{font-size:13px;line-height:1.9} .kv b{color:var(--ink)}
-  .empty{color:var(--faint);font-size:12px}
-  .joblink{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:600;transition:background .1s}
-  .joblink:hover{background:#4338ca}
+  .empty{color:var(--ink-mute);font-size:12px}
+  .joblink{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;transition:background .1s}
+  .joblink:hover{background:var(--brand-600)}
   @media(max-width:820px){.layout{flex-direction:column}.detail{position:static}}
 </style></head><body><div class="wrap">
   <div class="head"><h1>Korea Lead-Gen — Leads</h1>
