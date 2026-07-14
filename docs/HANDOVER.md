@@ -121,6 +121,17 @@ crontab -e
 # add this line for 12:00 daily:
 0 12 * * * /absolute/path/to/korea-leadgen/scripts/daily_wanted.sh
 ```
+
+**Auto-publish the shared link (optional).** To also refresh the public demo
+link every day, clone your GitHub Pages repo somewhere and point `PAGES_DIR` at
+it — the daily run then pushes the new pages automatically:
+```bash
+git clone https://github.com/<your-org>/<pages-repo>.git /path/to/pages
+# in the crontab line:
+0 12 * * * PAGES_DIR=/path/to/pages /absolute/path/to/korea-leadgen/scripts/daily_wanted.sh
+```
+Leave `PAGES_DIR` unset to skip publishing (local files still refresh).
+
 - Logs to `data/daily.log`.
 - The machine must be awake at the scheduled time.
 - On macOS, if it silently doesn't run, grant Full Disk Access to `cron` in
