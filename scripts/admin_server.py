@@ -24,10 +24,20 @@ ENV = ROOT / ".env"
 DATA = ROOT / "data"
 PORT = 8765
 
-MANAGED_KEYS = ["ANTHROPIC_API_KEY", "SARAMIN_API_KEY", "DART_API_KEY"]
+MANAGED_KEYS = ["ANTHROPIC_API_KEY", "SARAMIN_API_KEY", "WANTED_API_KEY",
+                "JOBKOREA_API_KEY", "DART_API_KEY"]
+# Sources with a working collector today. (Wanted currently uses the scraper;
+# when an official Wanted API is obtained, add a source_wanted_api.py and point
+# "wanted" here at it.)
 SOURCES = {
     "wanted": ["source_wanted.py", "--pages", "5"],
     "saramin": ["source_saramin.py", "--pages", "3"],
+}
+# Sources without a collector yet — plug in when the company gets API access.
+FUTURE = {
+    "jobkorea": ("JobKorea has no public API. When the company obtains API or "
+                 "partnership access, add scripts/source_jobkorea.py and register "
+                 "it in SOURCES — then this button collects from JobKorea."),
 }
 PIPELINE_AFTER = [
     ["enrich.py"], ["score_leads.py"], ["qualify_leads.py", "--top", "10"],
@@ -58,7 +68,7 @@ def write_env(updates: dict) -> None:
 def run_pipeline(source: str) -> tuple[bool, str]:
     src = SOURCES.get(source)
     if not src:
-        return False, f"Unknown source: {source}"
+        return False, FUTURE.get(source, f"Unknown source: {source}")
     out, ok = [], True
     for s in [src] + PIPELINE_AFTER:
         r = subprocess.run([sys.executable, str(ROOT / "scripts" / s[0]), *s[1:]],

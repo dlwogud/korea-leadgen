@@ -309,21 +309,23 @@ function renderSettings(){
     '<h1>⚙️ Settings — data sources</h1><div class="sub">Enter API keys, then collect. Works when opened via the internal admin server (scripts/admin_server.py, localhost); on the shared link it is view-only.</div>'
     +'<div class="card"><h2>API keys</h2>'
     +keyRow("ANTHROPIC_API_KEY","Anthropic (Claude)","AI 자격심사 + 아웃리치")
-    +keyRow("SARAMIN_API_KEY","Saramin (사람인)","채용 소스 — 라이선스 필요")
-    +keyRow("DART_API_KEY","DART (금융감독원)","기업 규모·재무 enrichment (채용 아님)")
+    +keyRow("SARAMIN_API_KEY","Saramin (사람인)","채용 소스 API — client 준비됨")
+    +keyRow("WANTED_API_KEY","Wanted (원티드)","공식 API 키 — 확보 후 client 연결 (지금은 크롤링)")
+    +keyRow("JOBKOREA_API_KEY","JobKorea (잡코리아)","공식 API/파트너십 확보 후 client 연결")
+    +keyRow("DART_API_KEY","DART (금융감독원)","기업 규모 enrichment (채용 아님)")
     +'<button class="setbtn" onclick="saveKeys()">💾 Save keys</button></div>'
     +'<div class="card"><h2>Collect + run pipeline</h2>'
-    +'<div class="note">소스 선택 → 수집 → ICP 점수 → Claude 자격심사·아웃리치 → 플랫폼 갱신. 원티드는 키 불필요, 잡코리아는 공개 API가 없어 미지원.</div>'
-    +'<button class="setbtn go" onclick=\\'collect("wanted")\\'>▶ Collect from Wanted (키 불필요)</button>'
-    +'<button class="setbtn go" onclick=\\'collect("saramin")\\'>▶ Collect from Saramin</button>'
-    +'<button class="setbtn" disabled title="공개 API 없음">JobKorea (API 없음)</button></div>'
+    +'<div class="note">소스 선택 → 수집 → ICP 점수 → Claude 심사·아웃리치 → 플랫폼 갱신. 현재: 원티드=크롤링, 사람인=API(client 준비). 원티드·잡코리아 공식 API는 확보 후 해당 source client를 연결하면 이 버튼이 API로 전환됩니다.</div>'
+    +'<button class="setbtn go" onclick=\\'collect("wanted")\\'>▶ Wanted (지금: 크롤링)</button>'
+    +'<button class="setbtn go" onclick=\\'collect("saramin")\\'>▶ Saramin (API)</button>'
+    +'<button class="setbtn go" onclick=\\'collect("jobkorea")\\'>▶ JobKorea (API 확보 시)</button></div>'
     +'<div class="card"><div class="sec-t">Status</div><pre id="setlog" class="setlog">idle</pre></div>';
 }
 function setStatus(t){ const el=document.getElementById("setlog"); if(el) el.textContent=t; }
 const NOBK = "⚠️ 이 화면엔 백엔드가 없습니다. 수집/저장은 scripts/admin_server.py 로 실행한 localhost 화면에서만 작동합니다.";
 function saveKeys(){
   const body=new URLSearchParams();
-  ["ANTHROPIC_API_KEY","SARAMIN_API_KEY","DART_API_KEY"].forEach(k=>{ const el=document.getElementById(k); if(el&&el.value) body.append(k,el.value); });
+  ["ANTHROPIC_API_KEY","SARAMIN_API_KEY","WANTED_API_KEY","JOBKOREA_API_KEY","DART_API_KEY"].forEach(k=>{ const el=document.getElementById(k); if(el&&el.value) body.append(k,el.value); });
   setStatus("Saving…");
   fetch("/save",{method:"POST",body}).then(r=>r.json()).then(d=>setStatus(d.msg||"Saved")).catch(()=>setStatus(NOBK));
 }
