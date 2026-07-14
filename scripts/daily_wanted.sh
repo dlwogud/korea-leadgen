@@ -18,8 +18,8 @@ python3 scripts/add_english.py               >> "$LOG" 2>&1   # English glosses 
 python3 scripts/score_leads.py               >> "$LOG" 2>&1   # ICP score
 python3 scripts/qualify_leads.py --top 10    >> "$LOG" 2>&1   # Claude fit/maybe/not_fit
 python3 scripts/generate_messages.py --top 10 >> "$LOG" 2>&1  # Claude EN/KR outreach
-python3 scripts/build_platform.py                  >> "$LOG" 2>&1   # rebuild consolidated app
-python3 scripts/export_delivery.py           >> "$LOG" 2>&1   # team delivery CSV
+python3 scripts/export_delivery.py           >> "$LOG" 2>&1   # team delivery CSV (embedded into platform)
+python3 scripts/build_platform.py            >> "$LOG" 2>&1   # rebuild consolidated app (embeds CSV)
 python3 scripts/view_delivery.py             >> "$LOG" 2>&1   # delivery sheet HTML
 
 echo "done $(date)" >> "$LOG"

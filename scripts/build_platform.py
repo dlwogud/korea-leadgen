@@ -41,6 +41,17 @@ def _events() -> dict:
     return {k: len(v) for k, v in by_stage.items()}
 
 
+def _delivery():
+    """The operational delivery sheet (cols, rows) to embed for CSV download."""
+    p = DATA_DIR / "delivery.csv"
+    if not p.exists():
+        return [], []
+    with p.open(encoding="utf-8-sig") as f:
+        r = csv.DictReader(f)
+        rows = list(r)
+        return (r.fieldnames or []), rows
+
+
 HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
@@ -138,6 +149,17 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <script>
 const DATA = __DATA__;
 const EVENTS = __EVENTS__;              // funnel stage → distinct company count (from log_event.py)
+const CSV_COLS = __CSVCOLS__;           // delivery sheet columns (operational output)
+const CSV_ROWS = __CSV__;               // delivery sheet rows
+function csvCell(v){ v=(v==null?"":""+v); const NL=String.fromCharCode(10), Q=String.fromCharCode(34);
+  return (v.indexOf(",")>=0||v.indexOf(Q)>=0||v.indexOf(NL)>=0) ? Q+v.split(Q).join(Q+Q)+Q : v; }
+function downloadCSV(){
+  if(!CSV_ROWS.length){ alert("No lead list yet — collect from Settings first."); return; }
+  const NL=String.fromCharCode(10), BOM=String.fromCharCode(65279);
+  const head=CSV_COLS.map(csvCell).join(","), body=CSV_ROWS.map(r=>CSV_COLS.map(c=>csvCell(r[c])).join(",")).join(NL);
+  const blob=new Blob([BOM+head+NL+body],{type:"text/csv;charset=utf-8;"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="korea-leads.csv"; a.click(); URL.revokeObjectURL(a.href);
+}
 let EDITS = {};                          // in-browser outreach edits (localStorage)
 try { EDITS = JSON.parse(localStorage.getItem("km_edits") || "{}"); } catch(e) { EDITS = {}; }
 
@@ -178,6 +200,7 @@ function renderOverview(){
     '<tr class="lead" onclick=\\'openLead('+JSON.stringify(d.company)+')\\'><td><b>'+esc(d.company)+'</b></td><td>'+pill(d.verdict)+'</td><td><span class="pill pri-'+pri(d)+'">'+pri(d)+'</span></td><td style="text-align:right"><b>'+d.fit.toFixed(0)+'</b></td></tr>').join("");
   document.getElementById("overview").innerHTML =
     '<h1>Overview</h1><div class="sub">AI-powered Korean lead generation for Springboard\\'s 4 services — sourced, scored, qualified &amp; drafted automatically.</div>'
+    +'<div style="margin-bottom:18px"><button class="setbtn go" onclick="downloadCSV()">⬇ Download lead list (CSV / Excel)</button></div>'
     +'<div class="cards">'
     +stat(c.n,"Leads")+stat(c.fit,"AI-qualified <b>fit</b>")+stat(c.avg,"Avg fit score")+stat(c.withM,"Outreach drafts")
     +'</div>'
@@ -328,10 +351,14 @@ def main() -> None:
         r["employees"] = emp.get(r["company"], "")
     payload = json.dumps(rows, ensure_ascii=False)
     events = json.dumps(_events(), ensure_ascii=False)
+    csv_cols, csv_rows = _delivery()
     out = DATA_DIR / "platform.html"
-    out.write_text(HTML.replace("__DATA__", payload).replace("__EVENTS__", events),
+    out.write_text(HTML.replace("__DATA__", payload).replace("__EVENTS__", events)
+                       .replace("__CSVCOLS__", json.dumps(csv_cols, ensure_ascii=False))
+                       .replace("__CSV__", json.dumps(csv_rows, ensure_ascii=False)),
                    encoding="utf-8")
-    print(f"Wrote {out} — {len(rows)} leads, 5-view consolidated platform.")
+    print(f"Wrote {out} — {len(rows)} leads, 5-view consolidated platform "
+          f"(CSV download: {len(csv_rows)} rows embedded).")
 
 
 if __name__ == "__main__":
