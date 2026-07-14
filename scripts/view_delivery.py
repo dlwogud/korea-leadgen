@@ -18,9 +18,10 @@ OUT = DATA_DIR / "delivery.html"
 
 # columns to show as compact table cells (outreach_message gets its own wide cell)
 COLS = [
-    ("company_name", "Company"), ("best_service", "Service"),
-    ("fit_score", "Fit"), ("hiring_count", "Hires"),
-    ("industry", "Industry"), ("tech_stack", "Tech stack"),
+    ("company_name", "Company"), ("industry", "Industry"),
+    ("company_size", "Size"), ("best_service", "Service"),
+    ("fit_score", "Fit"), ("ai_verdict", "Verdict"),
+    ("open_roles", "Roles"), ("tech_stack", "Tech stack"),
 ]
 
 PAGE = """<!doctype html><html lang="en"><head><meta charset="utf-8">
@@ -49,7 +50,7 @@ __ROWS__
 
 
 def main() -> None:
-    with SRC.open(encoding="utf-8") as f:
+    with SRC.open(encoding="utf-8-sig") as f:
         rows = list(csv.DictReader(f))
     rows.sort(key=lambda r: float(r.get("fit_score") or 0), reverse=True)
 

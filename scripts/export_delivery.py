@@ -1,10 +1,15 @@
-"""Export one team-ready delivery sheet: lead + Claude's outreach draft per row.
+"""Export the operational lead list for the sales team — the real deliverable.
 
-Merges the scored leads (and contacts, if enriched) with the AI outreach drafts
-into a single CSV the business team can paste into a shared Google Sheet and
-work directly: review the draft → approve → send.
+The website is the demo/visualization; THIS CSV is what the sales team filters,
+reviews, and works from. One row per Korean IT lead with the full field set:
+firmographics + contact + hiring signal + AI qualification + outreach draft +
+pipeline stage. Saved as UTF-8-with-BOM so it opens cleanly in Excel (Korean
+text intact).
 
-    python scripts/export_delivery.py   →   data/delivery.csv
+Columns that aren't collected yet (website, phone, HR email/name, search
+keyword) are included as blank columns for the team / enrichment to fill.
+
+    python scripts/export_delivery.py   →   data/delivery.csv  (opens in Excel)
 """
 from __future__ import annotations
 
@@ -14,13 +19,38 @@ from _common import DATA_DIR
 
 OUT = DATA_DIR / "delivery.csv"
 
-# Columns the outreach team works with
+# Full operational schema (order matches the sales-team spec).
 FIELDS = [
-    "company_name", "best_service", "fit_score", "hiring_count", "industry",
-    "tech_stack", "contact_name", "contact_title", "email", "linkedin_url", "job_posting_url",
-    "outreach_message",           # Claude's draft
-    "status", "notes",            # blank — for the team to fill
+    "company_name",       # 회사명
+    "industry",           # 업종
+    "company_size",       # 회사 규모 (approx. employees)
+    "website",            # 공식 웹사이트 (enrichment pending)
+    "hr_email",           # HR 이메일
+    "phone",              # 전화번호 (enrichment pending)
+    "hr_contact_name",    # HR 담당자명
+    "roles",              # 채용 직무
+    "location",           # 근무 위치
+    "tech_stack",         # 기술스택
+    "open_roles",         # 채용 인원 / 채용 중인 역할 수
+    "source",             # 데이터 출처
+    "search_keyword",     # 검색 키워드 (enrichment pending)
+    "summary",            # 회사/채용공고 요약 (AI)
+    "best_service",       # 가장 적합한 Springboard 서비스
+    "fit_score",          # ICP 적합도 점수
+    "ai_verdict",         # AI 판정 (fit / maybe / not_fit)
+    "outreach_angle",     # 아웃리치 관점
+    "outreach_message",   # 이메일 초안 (Claude)
+    "pipeline_stage",     # 현재 파이프라인 단계
+    "notes",              # 비고 (blank — team fills)
 ]
+
+# Short outreach angle per best-fit service.
+ANGLE = {
+    "it_servicing": "Take over dev delivery with a vetted Filipino team — faster & cheaper than local hiring",
+    "manpower": "Place vetted Filipino developers directly into their team",
+    "ai_implementation": "Build practical AI tools & workflows for them",
+    "systems_integration": "Build & integrate their systems (ERP, cloud, modernization)",
+}
 
 
 def _read(name):
@@ -29,44 +59,53 @@ def _read(name):
 
 
 def main() -> None:
-    # base leads: prefer final_leads (has contacts) else scored_leads
     leads = _read("final_leads.csv") or _read("scored_leads.csv")
+    db = {r["company_name"]: r for r in _read("companies_db.csv")}
     drafts = {d["company_name"]: d.get("message", "") for d in _read("outreach_drafts.csv")}
     contacts = {c["company_name"]: c for c in _read("contacts_worksheet.csv")}
-    # companies_db has best_service / tech_stack / industry (final_leads doesn't)
-    db = {r["company_name"]: r for r in _read("companies_db.csv")}
+    quals = {q["company_name"]: q for q in _read("qualified_leads.csv")}
 
     rows = []
     for lead in leads:
         name = lead.get("company_name", "")
-        c = contacts.get(name, {})
-        d = db.get(name, {})
+        d, c, q = db.get(name, {}), contacts.get(name, {}), quals.get(name, {})
+        service = lead.get("best_service", "") or d.get("best_service", "")
+        msg = drafts.get(name, "")
         rows.append({
             "company_name": name,
-            "best_service": lead.get("best_service", "") or d.get("best_service", ""),
-            "fit_score": lead.get("fit_score", ""),
-            "hiring_count": lead.get("hiring_count", "") or d.get("hiring_count", ""),
             "industry": lead.get("industry", "") or d.get("industry", ""),
-            "tech_stack": (lead.get("tech_stack", "") or d.get("tech_stack", "") or "").replace(";", ", "),
-            "contact_name": lead.get("contact_name", "") or c.get("full_name", ""),
-            "contact_title": lead.get("contact_title", "") or c.get("title", ""),
-            "email": lead.get("email", "") or c.get("email", ""),
-            "linkedin_url": lead.get("linkedin_url", "") or c.get("linkedin_url", ""),
-            "job_posting_url": lead.get("source_url", "") or d.get("source_url", ""),
-            "outreach_message": drafts.get(name, ""),   # blank if no draft yet
-            "status": "",
+            "company_size": d.get("employees", ""),
+            "website": "",                                   # enrichment pending
+            "hr_email": lead.get("email", "") or c.get("email", ""),
+            "phone": c.get("phone", ""),                     # enrichment pending
+            "hr_contact_name": lead.get("contact_name", "") or c.get("full_name", ""),
+            "roles": (d.get("sample_titles", "") or lead.get("sample_titles", "") or "").replace(";", ", "),
+            "location": d.get("locations", "") or lead.get("locations", ""),
+            "tech_stack": (d.get("tech_stack", "") or lead.get("tech_stack", "") or "").replace(";", ", "),
+            "open_roles": lead.get("hiring_count", "") or d.get("hiring_count", ""),
+            "source": d.get("source", "") or lead.get("source", ""),
+            "search_keyword": "",                            # not tracked yet
+            "summary": q.get("reason", ""),                  # AI qualification reasoning
+            "best_service": service,
+            "fit_score": lead.get("fit_score", ""),
+            "ai_verdict": q.get("verdict", ""),
+            "outreach_angle": ANGLE.get(service, ""),
+            "outreach_message": msg,
+            "pipeline_stage": "Outreach Drafted" if msg else "Target Identified",
             "notes": "",
         })
 
     DATA_DIR.mkdir(exist_ok=True)
-    with OUT.open("w", newline="", encoding="utf-8") as f:
+    # utf-8-sig so Excel renders Korean correctly
+    with OUT.open("w", newline="", encoding="utf-8-sig") as f:
         w = csv.DictWriter(f, fieldnames=FIELDS)
         w.writeheader()
         w.writerows(rows)
 
     with_msg = sum(1 for r in rows if r["outreach_message"])
-    print(f"Wrote {len(rows)} leads → data/delivery.csv ({with_msg} with an outreach draft)")
-    print("Paste it into the shared Google Sheet for the outreach team.")
+    fit = sum(1 for r in rows if r["ai_verdict"] == "fit")
+    print(f"Wrote {len(rows)} leads → data/delivery.csv  "
+          f"({fit} fit, {with_msg} with an outreach draft). Opens in Excel.")
 
 
 if __name__ == "__main__":
