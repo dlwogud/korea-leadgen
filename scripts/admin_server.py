@@ -40,10 +40,13 @@ FUTURE = {
                  "partnership access, add scripts/source_jobkorea.py and register "
                  "it in SOURCES — then this button collects from JobKorea."),
 }
+# Keep this in lockstep with scripts/daily_wanted.sh — same steps, same order.
+# export_delivery MUST run before build_platform (the platform embeds the CSV).
 PIPELINE_AFTER = [
-    ["enrich.py"], ["score_leads.py"], ["qualify_leads.py", "--top", "10"],
-    ["generate_messages.py", "--top", "10"], ["build_platform.py"],
-    ["export_delivery.py"], ["view_delivery.py"],
+    ["enrich.py"], ["enrich_dart.py"], ["add_english.py"],
+    ["score_leads.py"], ["qualify_leads.py", "--top", "10"],
+    ["generate_messages.py", "--top", "10"],
+    ["export_delivery.py"], ["build_platform.py"], ["view_delivery.py"],
 ]
 
 
