@@ -19,6 +19,7 @@ echo "===== $(date) — Wanted daily run =====" >> "$LOG"
 
 python3 scripts/source_wanted.py --pages 5   >> "$LOG" 2>&1   # scrape fresh postings
 python3 scripts/enrich.py                    >> "$LOG" 2>&1   # tech stack + living DB merge
+python3 scripts/enrich_dart.py               >> "$LOG" 2>&1   # official employee count (DART), cached
 python3 scripts/add_english.py               >> "$LOG" 2>&1   # English glosses (KR→EN) for the team
 python3 scripts/score_leads.py               >> "$LOG" 2>&1   # ICP score
 python3 scripts/qualify_leads.py --top 10    >> "$LOG" 2>&1   # Claude fit/maybe/not_fit

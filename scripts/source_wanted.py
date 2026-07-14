@@ -32,6 +32,7 @@ import requests
 from _common import write_companies
 
 API_URL = "https://www.wanted.co.kr/api/v4/jobs"
+COMPANY_JOBS_URL = "https://www.wanted.co.kr/api/v4/companies/{}/jobs"  # all open roles for one company
 JOB_URL = "https://www.wanted.co.kr/wd/{}"      # one representative posting link
 
 DEV_GROUP = "518"                # Wanted "개발" (developer) job group
@@ -95,11 +96,25 @@ def parse_job(job: dict) -> dict | None:
     parents = {t.get("parent_id") for t in tags if isinstance(t, dict)}
     if not company or not title:
         return None
+    company_id = comp.get("id") if isinstance(comp, dict) else None
     # dev if Wanted classifies it under the 개발 group; else fall back to title words
     is_dev = (DEV_GROUP_ID in parents) or (not parents and is_dev_title(title))
     return {"company": company.strip(), "title": title.strip(),
             "industry": industry.strip(), "location": loc,
-            "id": job.get("id"), "is_dev": is_dev}
+            "id": job.get("id"), "company_id": company_id, "is_dev": is_dev}
+
+
+def fetch_company_jobs(company_id, debug: bool = False) -> list[dict]:
+    """Every currently-open posting for one company (not just the ones that
+    happened to appear on the listing pages we read). This is what makes the
+    hiring-count signal accurate — a 280-person company hiring 6 devs shows as
+    6, not 1."""
+    r = requests.get(COMPANY_JOBS_URL.format(company_id), headers=HEADERS, timeout=15)
+    r.raise_for_status()
+    data = r.json().get("data") or []
+    if debug:
+        print(f"[debug] company {company_id}: {len(data)} total open postings")
+    return data
 
 
 def is_dev_title(title: str) -> bool:
@@ -113,6 +128,9 @@ def main() -> None:
     ap.add_argument("--job-group", default=DEV_GROUP, help="Wanted job group id (518=dev)")
     ap.add_argument("--all-roles", action="store_true",
                     help="skip the developer-title filter (keep every posting)")
+    ap.add_argument("--no-expand", action="store_true",
+                    help="skip per-company full-posting fetch (faster, but hiring "
+                         "count is undercounted to only what appeared on the pages read)")
     ap.add_argument("--sleep", type=float, default=SLEEP_BETWEEN_CALLS)
     ap.add_argument("--debug", action="store_true")
     args = ap.parse_args()
@@ -123,6 +141,7 @@ def main() -> None:
     locs: dict[str, set] = defaultdict(set)
     industry: dict[str, str] = {}
     first_id: dict[str, str] = {}
+    comp_id: dict[str, str] = {}
     seen_jobs = set()
     kept = skipped = 0
 
@@ -151,7 +170,41 @@ def main() -> None:
                 locs[c].add(rec["location"])
             industry.setdefault(c, rec["industry"])
             first_id.setdefault(c, rec["id"])
+            if rec.get("company_id"):
+                comp_id.setdefault(c, rec["company_id"])
         time.sleep(args.sleep)
+
+    # Expansion: for each discovered company, pull EVERY open posting (not just
+    # the ones seen on the listing pages) so hiring_count reflects real demand.
+    if not args.no_expand:
+        companies = list(titles.keys())
+        print(f"Expanding {sum(1 for c in companies if comp_id.get(c))} companies "
+              f"to their full posting lists...")
+        for c in companies:
+            cid = comp_id.get(c)
+            if not cid:
+                continue
+            try:
+                full = fetch_company_jobs(cid, args.debug)
+            except requests.RequestException:
+                continue                     # keep the listing-page count on failure
+            dev_titles, first_dev = [], None
+            for job in full:
+                rec = parse_job(job)
+                if not rec:
+                    continue
+                if not args.all_roles and not rec["is_dev"]:
+                    continue
+                dev_titles.append(rec["title"])
+                if first_dev is None:
+                    first_dev = rec["id"]
+                if rec["location"]:
+                    locs[c].add(rec["location"])
+            if dev_titles:
+                titles[c] = dev_titles       # replace undercount with full list
+                if first_dev:
+                    first_id[c] = first_dev
+            time.sleep(args.sleep)
 
     rows = []
     for company, ts in titles.items():
