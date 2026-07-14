@@ -32,6 +32,31 @@ writing*. Data collection is plain HTTP + JSON parsing (no AI, no browser).
 
 ---
 
+## Easiest start — the admin panel (no command line)
+
+After you've cloned the repo and installed deps (Steps 1–2 below), you can run
+**everything from a browser** — no terminal commands needed:
+
+```bash
+python3 scripts/admin_server.py      # starts a localhost-only admin page
+# then open http://localhost:8765
+```
+
+On that page you can:
+- **Enter your API keys** (Anthropic for AI; optionally Saramin, DART) → saved to `.env`
+- **Click "Collect from Wanted"** → runs the whole pipeline and rebuilds the platform
+- Open the result at **/platform**
+
+It binds to `127.0.0.1` (localhost) only — internal to that machine, not exposed
+to the network or the public. This is the simplest way to hand it off: keys in,
+click run, done. (The manual CLI steps below do the exact same thing.)
+
+> Notes: **Wanted needs no key** (works out of the box). **JobKorea has no public
+> API** (not supported). **DART (금융감독원)** is not a job source — its key adds
+> real company-size data for better scoring.
+
+---
+
 ## Step 1 — Repository
 
 The code currently lives at a personal GitHub account. Transfer it to a

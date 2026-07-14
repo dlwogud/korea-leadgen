@@ -84,6 +84,12 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
   .draftbar{display:flex;align-items:center;gap:8px;margin-top:8px}
   .copybtn{padding:6px 14px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:12px;font-weight:600;cursor:pointer}
   .resetbtn{padding:6px 12px;border:1px solid var(--bd);border-radius:8px;background:#fff;color:var(--faint);font-size:12px;cursor:pointer}
+  .setbtn{padding:9px 16px;border:1px solid var(--bd);border-radius:9px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;margin:6px 6px 0 0}
+  .setbtn.go{background:var(--accent);color:#fff;border:none}
+  .setbtn:disabled{opacity:.5;cursor:not-allowed}
+  .krow{margin-bottom:12px} .krow label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+  .krow input{width:100%;padding:9px 11px;border:1px solid var(--bd);border-radius:9px;font-size:13px}
+  .setlog{background:#0f1222;color:#cbd5e1;padding:12px;border-radius:10px;font-size:12px;white-space:pre-wrap;max-height:300px;overflow:auto;margin:0}
   .empty{color:#c0c4cc}
   .row2{display:flex;gap:18px;flex-wrap:wrap}.row2>*{flex:1;min-width:280px}
   #detail{position:fixed;top:0;right:0;width:420px;max-width:92vw;height:100vh;background:#fff;box-shadow:-8px 0 30px rgba(0,0,0,.14);padding:24px;overflow:auto;transform:translateX(100%);transition:.18s;z-index:1000}
@@ -107,6 +113,7 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
     <a data-v="funnel">📉 KPI Funnel</a>
     <a data-v="outreach">✉️ Outreach Studio</a>
     <a data-v="reco">🎯 Recommendation</a>
+    <a data-v="settings">⚙️ Settings</a>
   </div>
   <div class="foot">Team build — AI engine (Claude) · ICP scoring · pipeline · funnel · outreach · DSS. Data: demo (real listings); production switches to a licensed API.</div>
 </div>
@@ -116,6 +123,7 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
   <section id="funnel"></section>
   <section id="outreach"></section>
   <section id="reco"></section>
+  <section id="settings"></section>
 </div>
 <div id="detail"></div>
 <script>
@@ -292,7 +300,39 @@ document.querySelectorAll(".nav a").forEach(a=>a.onclick=()=>{
   const v=a.dataset.v;document.querySelectorAll("section").forEach(s=>s.classList.remove("on"));
   document.getElementById(v).classList.add("on");closeD();
 });
-renderOverview();renderPipeline();renderFunnel();renderOutreach();renderReco();
+function keyRow(id,label,hint){
+  return '<div class="krow"><label>'+label+' <span class="empty" style="font-size:11px">'+hint+'</span></label>'
+    +'<input id="'+id+'" type="password" placeholder="•••• (saved to .env; leave blank to keep current)"></div>';
+}
+function renderSettings(){
+  document.getElementById("settings").innerHTML =
+    '<h1>⚙️ Settings — data sources</h1><div class="sub">Enter API keys, then collect. Works when opened via the internal admin server (scripts/admin_server.py, localhost); on the shared link it is view-only.</div>'
+    +'<div class="card"><h2>API keys</h2>'
+    +keyRow("ANTHROPIC_API_KEY","Anthropic (Claude)","AI 자격심사 + 아웃리치")
+    +keyRow("SARAMIN_API_KEY","Saramin (사람인)","채용 소스 — 라이선스 필요")
+    +keyRow("DART_API_KEY","DART (금융감독원)","기업 규모·재무 enrichment (채용 아님)")
+    +'<button class="setbtn" onclick="saveKeys()">💾 Save keys</button></div>'
+    +'<div class="card"><h2>Collect + run pipeline</h2>'
+    +'<div class="note">소스 선택 → 수집 → ICP 점수 → Claude 자격심사·아웃리치 → 플랫폼 갱신. 원티드는 키 불필요, 잡코리아는 공개 API가 없어 미지원.</div>'
+    +'<button class="setbtn go" onclick=\\'collect("wanted")\\'>▶ Collect from Wanted (키 불필요)</button>'
+    +'<button class="setbtn go" onclick=\\'collect("saramin")\\'>▶ Collect from Saramin</button>'
+    +'<button class="setbtn" disabled title="공개 API 없음">JobKorea (API 없음)</button></div>'
+    +'<div class="card"><div class="sec-t">Status</div><pre id="setlog" class="setlog">idle</pre></div>';
+}
+function setStatus(t){ const el=document.getElementById("setlog"); if(el) el.textContent=t; }
+const NOBK = "⚠️ 이 화면엔 백엔드가 없습니다. 수집/저장은 scripts/admin_server.py 로 실행한 localhost 화면에서만 작동합니다.";
+function saveKeys(){
+  const body=new URLSearchParams();
+  ["ANTHROPIC_API_KEY","SARAMIN_API_KEY","DART_API_KEY"].forEach(k=>{ const el=document.getElementById(k); if(el&&el.value) body.append(k,el.value); });
+  setStatus("Saving…");
+  fetch("/save",{method:"POST",body}).then(r=>r.json()).then(d=>setStatus(d.msg||"Saved")).catch(()=>setStatus(NOBK));
+}
+function collect(src){
+  setStatus("Collecting from "+src+"… 전체 파이프라인 실행 중 (1~2분). 완료되면 자동 새로고침됩니다.");
+  const body=new URLSearchParams(); body.append("source",src);
+  fetch("/run",{method:"POST",body}).then(r=>r.json()).then(d=>{ setStatus(d.log||"done"); if(d.ok) setTimeout(()=>location.reload(),1800); }).catch(()=>setStatus(NOBK));
+}
+renderOverview();renderPipeline();renderFunnel();renderOutreach();renderReco();renderSettings();
 </script></body></html>"""
 
 
