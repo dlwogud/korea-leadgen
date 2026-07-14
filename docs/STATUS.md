@@ -37,7 +37,7 @@ explainable — every score traces to evidence.
 - **Outreach** (`generate_messages.py`): Claude drafts an **English + Korean**
   first-touch message per lead. All drafts require human approval before sending.
 
-## 6. Consolidated Platform (`platform.py`)
+## 6. Consolidated Platform (`build_platform.py`)
 One self-contained app, five views: Overview · Pipeline (CRM) · KPI Funnel ·
 Outreach Studio · Recommendation (DSS). Searchable (KR/EN), fit-first ranking,
 shareable by link.

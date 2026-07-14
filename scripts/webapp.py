@@ -97,6 +97,11 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
   .sec{margin:16px 0} .sec .lbl{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:6px}
   .reason{font-size:13px;color:#374151;line-height:1.6;margin-top:6px}
   .msg{background:#f9fafb;border:1px solid var(--bd);border-radius:10px;padding:14px 16px;font-size:13px;line-height:1.7;white-space:pre-wrap;color:#374151}
+  textarea.msg{width:100%;min-height:190px;resize:vertical;font-family:inherit;outline:none;display:block}
+  textarea.msg:focus{border-color:#4f46e5}
+  .draftbar{display:flex;gap:8px;margin-top:8px}
+  .copybtn{padding:6px 14px;border:none;border-radius:8px;background:#4f46e5;color:#fff;font-size:12px;font-weight:600;cursor:pointer}
+  .resetbtn{padding:6px 12px;border:1px solid var(--bd);border-radius:8px;background:#fff;color:#6b7280;font-size:12px;cursor:pointer}
   .kv{font-size:13px;line-height:1.9} .kv b{color:var(--ink)}
   .empty{color:var(--faint);font-size:12px}
   .joblink{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:600;transition:background .1s}
@@ -123,6 +128,17 @@ HTML = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 </div>
 <script>
 const DATA = __DATA__;
+let EDITS = {};
+try { EDITS = JSON.parse(localStorage.getItem("km_edits") || "{}"); } catch(e) { EDITS = {}; }
+function curDraft(){ if(EDITS[selected]!=null) return EDITS[selected]; const d=DATA.find(x=>x.company===selected); return (d&&d.message)||""; }
+function saveEdit(v){ EDITS[selected]=v; try{ localStorage.setItem("km_edits", JSON.stringify(EDITS)); }catch(e){} }
+function resetDraft(){ delete EDITS[selected]; try{ localStorage.setItem("km_edits", JSON.stringify(EDITS)); }catch(e){} drawDetail(); }
+function copyDraft(btn){ const t=curDraft(); navigator.clipboard.writeText(t).then(()=>{ const o=btn.textContent; btn.textContent="✓ Copied"; setTimeout(()=>btn.textContent=o,1200); }).catch(()=>{}); }
+function editableDraft(){
+  return '<textarea class="msg" spellcheck="false" oninput="saveEdit(this.value)">'+esc(curDraft())+'</textarea>'
+    +'<div class="draftbar"><button class="copybtn" onclick="copyDraft(this)">📋 Copy</button>'
+    +'<button class="resetbtn" onclick="resetDraft()">Reset to AI draft</button></div>';
+}
 const SVC = {it_servicing:"IT Servicing", manpower:"Manpower", ai_implementation:"AI Implementation", systems_integration:"Systems Integration"};
 const VICON = {fit:"✅", maybe:"🟡", not_fit:"❌"};
 let sortKey="fit", sortDir=-1, selected=null;
@@ -226,8 +242,8 @@ function drawDetail(){
       +'<div class="reason">'+(esc(d.reason)||'<span class=empty>not qualified yet</span>')+'</div></div>'
     +'<div class="sec"><div class="lbl">Tech stack</div><div class="kv">'+(esc(d.tech)||'<span class=empty>—</span>')+'</div></div>'
     +'<div class="sec"><div class="lbl">Contact</div>'+contact+'</div>'
-    +'<div class="sec"><div class="lbl">✉️ AI outreach draft</div>'
-      +(d.message?'<div class="msg">'+esc(d.message)+'</div>':'<div class="empty">no draft yet — run generate_messages.py</div>')+'</div>';
+    +'<div class="sec"><div class="lbl">✉️ AI outreach draft (editable)</div>'
+      +(d.message?editableDraft():'<div class="empty">no draft yet — run generate_messages.py</div>')+'</div>';
 }
 render();
 </script></body></html>"""

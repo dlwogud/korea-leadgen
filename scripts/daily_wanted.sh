@@ -17,7 +17,7 @@ python3 scripts/enrich.py                    >> "$LOG" 2>&1   # tech stack + liv
 python3 scripts/score_leads.py               >> "$LOG" 2>&1   # ICP score
 python3 scripts/qualify_leads.py --top 10    >> "$LOG" 2>&1   # Claude fit/maybe/not_fit
 python3 scripts/generate_messages.py --top 10 >> "$LOG" 2>&1  # Claude EN/KR outreach
-python3 scripts/platform.py                  >> "$LOG" 2>&1   # rebuild consolidated app
+python3 scripts/build_platform.py                  >> "$LOG" 2>&1   # rebuild consolidated app
 python3 scripts/export_delivery.py           >> "$LOG" 2>&1   # team delivery CSV
 python3 scripts/view_delivery.py             >> "$LOG" 2>&1   # delivery sheet HTML
 

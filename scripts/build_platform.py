@@ -10,7 +10,7 @@ Combines the team's strengths into ONE navigable platform (no server needed):
 Data comes from the same pipeline (build_dataset). Contact/evidence columns are
 left ready for the crawled contact data to plug in.
 
-    python scripts/platform.py   →   data/platform.html
+    python scripts/build_platform.py   →   data/platform.html
 """
 from __future__ import annotations
 

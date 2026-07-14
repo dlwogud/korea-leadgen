@@ -12,7 +12,7 @@ licensed alternative (see the bottom).
 
 ```
 source_wanted.py  → enrich → score → qualify (Claude) → outreach (Claude)
-                  → platform.py → export_delivery → view_delivery
+                  → build_platform.py → export_delivery → view_delivery
 ```
 
 Run it once by hand to verify:

@@ -13,7 +13,7 @@ Wanted postings → enrich → ICP score → Claude qualify (fit/maybe/no) → E
 
 ## The platform (5 views)
 
-`scripts/platform.py` builds a single self-contained app (`data/platform.html`):
+`scripts/build_platform.py` builds a single self-contained app (`data/platform.html`):
 
 - **Overview** — KPIs, top leads, service/priority mix, funnel
 - **Pipeline (CRM)** — searchable leads: priority, AI verdict, evidence, detail

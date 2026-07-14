@@ -80,7 +80,7 @@ python3 scripts/enrich.py                       # tech stack + living DB
 python3 scripts/score_leads.py                  # ICP score
 python3 scripts/qualify_leads.py --top 10       # Claude Fit/Maybe/Not-Fit
 python3 scripts/generate_messages.py --top 10   # Claude EN/KR outreach
-python3 scripts/platform.py                     # build data/platform.html
+python3 scripts/build_platform.py                     # build data/platform.html
 python3 scripts/export_delivery.py              # data/delivery.csv
 python3 scripts/view_delivery.py                # data/delivery.html
 ```
@@ -143,7 +143,7 @@ python3 scripts/log_event.py --company "앤서스랩코리아" --service it_serv
 | `concrete_interest` | 7 · Meeting / Interest |
 | `korea_visit_ready` | 8 · Korea Visit |
 
-Events accumulate in `data/pipeline_events.csv`. Rerun `scripts/platform.py`
+Events accumulate in `data/pipeline_events.csv`. Rerun `scripts/build_platform.py`
 (or wait for the daily cron) and the funnel updates. **Honesty principle: only
 log events that actually happened** — never pre-fill the funnel. (The file
 starts empty; do not seed it with fake data.)
@@ -174,7 +174,7 @@ scripts/
   score_leads.py        ICP scoring
   qualify_leads.py      Claude Fit/Maybe/Not-Fit
   generate_messages.py  Claude EN/KR outreach drafts
-  platform.py           Builds the consolidated 5-view app (data/platform.html)
+  build_platform.py           Builds the consolidated 5-view app (data/platform.html)
   export_delivery.py    Team delivery CSV
   view_delivery.py      Delivery sheet (HTML)
   daily_wanted.sh       Runs the whole pipeline (for cron)
