@@ -202,32 +202,6 @@ The pipeline is identical regardless of source — each writes
 
 ---
 
-## Updating the KPI funnel (real events)
-
-Funnel stages 1–3 are computed automatically (leads / contacts / drafts).
-Stages 4–8 reflect **real events only** — log each one as it actually happens:
-
-```bash
-python3 scripts/log_event.py --company "앤서스랩코리아" --service it_servicing --stage outreach_sent
-```
-
-`--stage` values and where they land in the funnel:
-
-| `--stage` | Funnel stage |
-|-----------|--------------|
-| `outreach_sent` | 4 · Outreach Sent |
-| `reply_received` | 5 · Response |
-| `call_booked` | 6 · Verification Call |
-| `concrete_interest` | 7 · Meeting / Interest |
-| `korea_visit_ready` | 8 · Korea Visit |
-
-Events accumulate in `data/pipeline_events.csv`. Rerun `scripts/build_platform.py`
-(or wait for the daily cron) and the funnel updates. **Honesty principle: only
-log events that actually happened** — never pre-fill the funnel. (The file
-starts empty; do not seed it with fake data.)
-
----
-
 ## Personal → company swap checklist
 
 | Item | Intern setup (now) | Company setup (target) |

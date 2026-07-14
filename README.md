@@ -11,15 +11,14 @@ Wanted postings → enrich → ICP score → Claude qualify (fit/maybe/no) → E
 
 **Live demo:** https://dlwogud.github.io/km-platform-demo/
 
-## The platform (5 views)
+## The platform
 
 `scripts/build_platform.py` builds a single self-contained app (`data/platform.html`):
 
-- **Overview** — KPIs, top leads, service/priority mix, funnel
-- **Pipeline (CRM)** — searchable leads: priority, AI verdict, evidence, detail
-- **KPI Funnel** — the playbook's 8-stage funnel (real events only)
-- **Outreach Studio** — Claude EN/KR drafts, searchable
-- **Recommendation (DSS)** — data-driven Go / Pilot / No-Go
+- **Overview** — KPIs, top leads, service/priority mix
+- **Pipeline (CRM)** — searchable leads: priority, AI verdict, evidence, editable contacts
+- **Outreach Studio** — editable Claude EN/KR drafts, searchable
+- **Settings** — API keys per source + run collection (via the internal admin server)
 
 ## Quick start
 

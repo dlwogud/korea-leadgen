@@ -38,15 +38,11 @@ explainable — every score traces to evidence.
   first-touch message per lead. All drafts require human approval before sending.
 
 ## 6. Consolidated Platform (`build_platform.py`)
-One self-contained app, five views: Overview · Pipeline (CRM) · KPI Funnel ·
-Outreach Studio · Recommendation (DSS). Searchable (KR/EN), fit-first ranking,
-shareable by link.
+One self-contained app: Overview · Pipeline (CRM) · Outreach Studio · Settings.
+Searchable (KR/EN), fit-first ranking, editable outreach + editable per-company
+contacts, shareable by link.
 
-## 7. KPI Funnel
-8-stage funnel. Stages 1–3 auto-computed; stages 4–8 reflect **real events only**,
-logged via `log_event.py` (honesty principle — no fake data).
-
-## 8. Automation
+## 7. Automation
 `daily_wanted.sh` runs the full pipeline; scheduled via cron (12:00 daily).
 Logs to `data/daily.log`. See `docs/AUTOMATION.md`.
 
@@ -59,5 +55,5 @@ Logs to `data/daily.log`. See `docs/AUTOMATION.md`.
 ## Honest limitations
 - Prototype-grade data: 27 companies, sizes partly estimated, contacts pending.
 - API-ready but sourcing is currently on-demand, not yet a licensed live feed.
-- No real outreach outcomes yet (funnel honestly empty past "drafted").
+- No real outreach outcomes yet (drafts ready, not yet sent).
 - Consolidation is at the feature/UI level; deeper data integration plugs in next.
