@@ -192,7 +192,7 @@ function barRow(label,val,max){const p=(max&&val>0)?Math.max(7,Math.round(val/ma
 
 let sortK="fit", sortD=-1;
 const ALIAS={"데이터":"data","백엔드":"backend","프론트":"frontend","핀테크":"fintech","게임":"game gaming","보안":"security","의료":"health medical","헬스":"health","클라우드":"cloud","인공지능":"ai","엔지니어":"engineer","개발자":"developer","이커머스":"ecommerce"};
-function hay(d){let h=[d.company,d.industry,d.service,d.tech,d.region,d.roles,d.verdict,pri(d)].join(" ").toLowerCase();for(const k in ALIAS){if(h.indexOf(k.toLowerCase())>=0)h+=" "+ALIAS[k];}return h;}
+function hay(d){let h=[d.company,d.company_en,d.industry,d.service,d.tech,d.region,d.roles,d.verdict,pri(d)].join(" ").toLowerCase();for(const k in ALIAS){if(h.indexOf(k.toLowerCase())>=0)h+=" "+ALIAS[k];}return h;}
 function matchLead(d,t){return !t || hay(d).indexOf(t)>=0;}
 function renderPipeline(){
   document.getElementById("pipeline").innerHTML =
@@ -263,7 +263,7 @@ function editableContact(d){
 }
 function openLead(co){const d=DATA.find(x=>x.company===co);if(!d)return; curCo=co;
   document.getElementById("detail").innerHTML =
-    '<span class="x" onclick="closeD()">×</span><h3>'+esc(d.company)+'</h3>'
+    '<span class="x" onclick="closeD()">×</span><h3>'+esc(d.company)+(d.company_en?' <span class="empty" style="font-weight:400;font-size:14px">('+esc(d.company_en)+')</span>':'')+'</h3>'
     +'<div class="empty" style="font-size:12px">'+esc(d.industry)+' · '+esc(d.region)+'</div>'
     +'<div class="kv"><b>Fit '+d.fit.toFixed(0)+'</b> · '+pill(d.verdict)+' <span class="empty">('+(d.confidence||"-")+')</span> · Priority <span class="pill pri-'+pri(d)+'">'+pri(d)+'</span></div>'
     +'<div class="kv">Service: <span class="chip">'+esc(d.service||"—")+'</span> · Size: '+(d.employees?esc(d.employees):"—")+' · Hiring: '+(d.hiring||"—")+'</div>'

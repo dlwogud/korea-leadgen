@@ -58,6 +58,13 @@ def _read(name):
     return list(csv.DictReader(p.open(encoding="utf-8"))) if p.exists() else []
 
 
+def _bi(kr, en):
+    """'Korean (English)' when an English gloss exists, else just Korean."""
+    kr = (kr or "").strip()
+    en = (en or "").strip()
+    return f"{kr} ({en})" if en and en != kr else kr
+
+
 def main() -> None:
     leads = _read("final_leads.csv") or _read("scored_leads.csv")
     db = {r["company_name"]: r for r in _read("companies_db.csv")}
@@ -72,15 +79,16 @@ def main() -> None:
         service = lead.get("best_service", "") or d.get("best_service", "")
         msg = drafts.get(name, "")
         rows.append({
-            "company_name": name,
-            "industry": lead.get("industry", "") or d.get("industry", ""),
+            "company_name": _bi(name, d.get("company_en", "")),
+            "industry": _bi(lead.get("industry", "") or d.get("industry", ""), d.get("industry_en", "")),
             "company_size": d.get("employees", ""),
             "website": "",                                   # enrichment pending
             "hr_email": lead.get("email", "") or c.get("email", ""),
             "phone": c.get("phone", ""),                     # enrichment pending
             "hr_contact_name": lead.get("contact_name", "") or c.get("full_name", ""),
-            "roles": (d.get("sample_titles", "") or lead.get("sample_titles", "") or "").replace(";", ", "),
-            "location": d.get("locations", "") or lead.get("locations", ""),
+            "roles": _bi((d.get("sample_titles", "") or lead.get("sample_titles", "") or "").replace(";", ", "),
+                         (d.get("roles_en", "") or "").replace("; ", ", ").replace(";", ", ")),
+            "location": _bi(d.get("locations", "") or lead.get("locations", ""), d.get("location_en", "")),
             "tech_stack": (d.get("tech_stack", "") or lead.get("tech_stack", "") or "").replace(";", ", "),
             "open_roles": lead.get("hiring_count", "") or d.get("hiring_count", ""),
             "source": d.get("source", "") or lead.get("source", ""),

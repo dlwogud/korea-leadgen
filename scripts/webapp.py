@@ -23,6 +23,12 @@ def _read(name):
     return list(csv.DictReader(p.open(encoding="utf-8"))) if p.exists() else []
 
 
+def _bi(kr, en):
+    """'Korean (English)' when an English gloss exists, else just Korean."""
+    kr = (kr or "").strip(); en = (en or "").strip()
+    return f"{kr} ({en})" if en and en != kr else kr
+
+
 def build_dataset() -> list[dict]:
     db = {r["company_name"]: r for r in _read("companies_db.csv")}
     scores = {r["company_name"]: r for r in _read("scored_leads.csv")}
@@ -38,13 +44,14 @@ def build_dataset() -> list[dict]:
         fn, q, c = final.get(name, {}), quals.get(name, {}), contacts.get(name, {})
         rows.append({
             "company": name,
+            "company_en": d.get("company_en", ""),
             "service": d.get("best_service", "") or fn.get("best_service", ""),
             "fit": float(fn.get("fit_score") or s.get("fit_score") or 0),
             "hiring": d.get("hiring_count", "") or s.get("hiring_count", ""),
-            "industry": d.get("industry", "") or s.get("industry", ""),
+            "industry": _bi(d.get("industry", "") or s.get("industry", ""), d.get("industry_en", "")),
             "tech": (d.get("tech_stack", "") or "").replace(";", ", "),
-            "region": d.get("locations", ""),
-            "roles": (d.get("sample_titles", "") or s.get("sample_titles", "") or "").replace(";", ", "),
+            "region": _bi(d.get("locations", ""), d.get("location_en", "")),
+            "roles": _bi((d.get("sample_titles", "") or s.get("sample_titles", "") or "").replace(";", ", "), (d.get("roles_en", "") or "").replace("; ", ", ").replace(";", ", ")),
             "url": d.get("source_url", "") or s.get("source_url", ""),
             "contact_name": fn.get("contact_name", "") or c.get("full_name", ""),
             "contact_title": fn.get("contact_title", "") or c.get("title", ""),
@@ -173,7 +180,7 @@ const ALIAS = {"데이터 엔지니어":"data engineer","데이터엔지니어":
   "핀테크":"fintech","이커머스":"ecommerce","게임":"gaming game","보안":"security","물류":"logistics","제조":"manufacturing"};
 // all searchable text: name + industry + tech + service + region + job roles (+ English aliases)
 function hay(d){
-  let t = (d.company+' '+(d.industry||'')+' '+(d.tech||'')+' '+(SVC[d.service]||d.service||'')+' '+d.service+' '+(d.region||'')+' '+(d.roles||'')).toLowerCase();
+  let t = (d.company+' '+(d.company_en||'')+' '+(d.industry||'')+' '+(d.tech||'')+' '+(SVC[d.service]||d.service||'')+' '+d.service+' '+(d.region||'')+' '+(d.roles||'')).toLowerCase();
   for(const k in ALIAS){ if(t.indexOf(k.toLowerCase())>=0) t += ' '+ALIAS[k]; }
   return t;
 }
@@ -237,7 +244,7 @@ function drawDetail(){
     : '<div class="empty">No decision-maker contact yet.</div>';
   const link = d.url ? '<a class="joblink" href="'+esc(d.url)+'" target="_blank" rel="noopener">🔗 View job posting →</a>' : '';
   el.innerHTML =
-    '<h2>'+esc(d.company)+'</h2>'
+    '<h2>'+esc(d.company)+(d.company_en?' <span class="empty" style="font-weight:400;font-size:14px">('+esc(d.company_en)+')</span>':'')+'</h2>'
     +'<div class="meta">'+esc(d.industry)+' · '+esc(d.region)+' · '+(d.hiring||0)+' openings</div>'
     +(link?'<div class="sec">'+link+'</div>':'')
     +'<div class="sec"><div class="lbl">Fit score</div>'
